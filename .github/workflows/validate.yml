@@ -1,0 +1,79 @@
+name: Validate Marketplace
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Validate JSON syntax
+        run: |
+          echo "Validating Claude Code marketplace.json..."
+          jq empty .claude-plugin/marketplace.json
+
+          echo "Validating Cursor marketplace.json..."
+          jq empty .cursor-plugin/marketplace.json
+
+          echo "Validating plugin manifests..."
+          for manifest in $(find plugins -name "plugin.json"); do
+            echo "  Checking $manifest"
+            jq empty "$manifest"
+          done
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+
+      - name: Run validation script
+        run: node scripts/validate-template.mjs
+
+      - name: Validate dual-format consistency
+        run: |
+          echo "Checking version consistency between Cursor and Claude Code formats..."
+
+          CURSOR_MKT_VER=$(jq -r '.metadata.version' .cursor-plugin/marketplace.json)
+          CLAUDE_MKT_VER=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
+
+          if [ "$CURSOR_MKT_VER" != "$CLAUDE_MKT_VER" ]; then
+            echo "ERROR: Marketplace versions don't match (Cursor: $CURSOR_MKT_VER, Claude: $CLAUDE_MKT_VER)"
+            exit 1
+          fi
+
+          echo "Marketplace versions match: $CURSOR_MKT_VER"
+
+          for plugin_dir in plugins/*; do
+            if [ -d "$plugin_dir" ]; then
+              plugin_name=$(basename "$plugin_dir")
+
+              if [ -f "$plugin_dir/.claude-plugin/plugin.json" ] && [ -f "$plugin_dir/.cursor-plugin/plugin.json" ]; then
+                CLAUDE_VER=$(jq -r '.version' "$plugin_dir/.claude-plugin/plugin.json")
+                CURSOR_VER=$(jq -r '.version' "$plugin_dir/.cursor-plugin/plugin.json")
+
+                if [ "$CLAUDE_VER" != "$CURSOR_VER" ]; then
+                  echo "ERROR: Plugin '$plugin_name' versions don't match (Cursor: $CURSOR_VER, Claude: $CLAUDE_VER)"
+                  exit 1
+                fi
+
+                echo "Plugin '$plugin_name' versions match: $CLAUDE_VER"
+              fi
+            fi
+          done
+
+      - name: Summary
+        run: |
+          echo ""
+          echo "=== Validation Summary ==="
+          echo "Cursor marketplace: .cursor-plugin/marketplace.json"
+          echo "Claude Code marketplace: .claude-plugin/marketplace.json"
+          echo "Plugins: $(jq '.plugins | length' .cursor-plugin/marketplace.json)"
+          echo "Skills: $(find plugins -name 'SKILL.md' | wc -l | tr -d ' ')"
+          echo ""
+          echo "All validations passed"
