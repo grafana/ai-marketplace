@@ -1,24 +1,19 @@
 {
-  "name": "cursor-plugin-starters",
+  "name": "grafana-cursor-plugin",
   "owner": {
-    "name": "Your Org",
-    "email": "plugins@example.com"
+    "name": "Grafana Labs",
+    "email": "plugins@grafana.com"
   },
   "metadata": {
-    "description": "Starter marketplace template for Cursor plugins",
+    "description": "Grafana plugins for Cursor",
     "version": "0.1.0",
     "pluginRoot": "plugins"
   },
   "plugins": [
     {
-      "name": "starter-simple",
-      "source": "./plugins/starter-simple",
-      "description": "Minimal plugin with rules and skills only"
-    },
-    {
-      "name": "starter-advanced",
-      "source": "./plugins/starter-advanced",
-      "description": "Full-featured plugin with rules, skills, agents, commands, hooks, and MCP"
+      "name": "grafana",
+      "source": "plugins/grafana",
+      "description": "Grafana plugin for AI-assisted observability workflows"
     }
   ]
 }

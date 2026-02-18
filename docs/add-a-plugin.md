@@ -50,7 +50,7 @@ Edit `.cursor-plugin/marketplace.json` and append a new entry:
 ```json
 {
   "name": "my-new-plugin",
-  "source": "./plugins/my-new-plugin",
+  "source": "plugins/my-new-plugin",
   "description": "Describe your plugin"
 }
 ```

@@ -1,34 +1,43 @@
-# Cursor plugin template
+# Grafana Cursor Plugin
 
-Build and publish Cursor Marketplace plugins from a single repo.
-
-Two starter plugins are included:
-
-- **starter-simple**: rules and skills only
-- **starter-advanced**: rules, skills, agents, commands, hooks, MCP, and scripts
+Cursor Marketplace plugin that exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) for AI-assisted observability workflows.
 
 ## Getting started
 
-[Use this template](https://github.com/cursor/plugin-template/generate) to create a new repository, then customize:
+1. Install `mcp-grafana` (choose one):
 
-1. `.cursor-plugin/marketplace.json`: set marketplace `name`, `owner`, and `metadata`.
-2. `plugins/*/.cursor-plugin/plugin.json`: set `name` (lowercase kebab-case), `displayName`, `author`, `description`, `keywords`, `license`, and `version`.
-3. Replace placeholder rules, skills, agents, commands, hooks, scripts, and logos.
+   ```bash
+   # From source (requires Go)
+   go install github.com/grafana/mcp-grafana/cmd/mcp-grafana@latest
 
-To add more plugins, see `docs/add-a-plugin.md`.
+   # Or download a binary from GitHub releases
+   # https://github.com/grafana/mcp-grafana/releases
+   ```
 
-## Single plugin vs multi-plugin
+2. Create a [service account](https://grafana.com/docs/grafana/latest/administration/service-accounts/) in Grafana with at least **Viewer** role (or **Editor** for write operations). Generate a token.
 
-This template defaults to **multi-plugin** (multiple plugins in one repo).
+3. Set environment variables:
 
-For a **single plugin**, move your plugin folder contents to the repository root, keep one `.cursor-plugin/plugin.json`, and remove `.cursor-plugin/marketplace.json`.
+   ```bash
+   export GRAFANA_URL="http://localhost:3000"
+   export GRAFANA_SERVICE_ACCOUNT_TOKEN="<your token>"
+   ```
 
-## Submission checklist
+4. Install the plugin from the Cursor Marketplace.
 
-- Each plugin has a valid `.cursor-plugin/plugin.json`.
-- Plugin names are unique, lowercase, and kebab-case.
-- `.cursor-plugin/marketplace.json` entries map to real plugin folders.
-- All frontmatter metadata is present in rule, skill, agent, and command files.
-- Logos are committed and referenced with relative paths.
-- `node scripts/validate-template.mjs` passes.
-- Repository link is ready for submission to the Cursor team (Slack or `kniparko@anysphere.com`).
+## What's included
+
+- **MCP server** (`mcp.json`) — configures the official `mcp-grafana` binary, providing 40+ tools for dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, annotations, and more.
+- **Rule** (`rules/grafana-assistant.mdc`) — best practices for using Grafana MCP tools effectively (context window management, write safety, deeplinks).
+
+See [plugins/grafana/README.md](plugins/grafana/README.md) for the full tool reference.
+
+## Development
+
+To validate the plugin structure:
+
+```bash
+node scripts/validate-template.mjs
+```
+
+To add more plugins, create a new directory under `plugins/` and register it in `.cursor-plugin/marketplace.json`. See `docs/add-a-plugin.md` for details.

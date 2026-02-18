@@ -1,0 +1,15 @@
+---
+description: Best practices for using Grafana MCP tools effectively
+alwaysApply: true
+---
+
+grafana-assistant:
+
+- Use `get_dashboard_summary` instead of `get_dashboard_by_uid` to avoid consuming the context window with full dashboard JSON.
+- Use `get_dashboard_property` with JSONPath expressions to extract only the specific parts you need from a dashboard.
+- Prefer `patch_dashboard` for targeted modifications rather than `update_dashboard` with the full JSON payload.
+- When querying Prometheus, always specify a reasonable time range to avoid overwhelming results.
+- When querying Loki, prefer targeted LogQL selectors with label matchers over broad queries.
+- Use `search_dashboards` to discover dashboards before attempting to retrieve them by UID.
+- Avoid write operations (`update_dashboard`, `create_incident`, `create_alert_rule`) unless explicitly asked by the user.
+- When presenting Grafana data, use `generate_deeplink` to provide clickable URLs rather than describing navigation steps.

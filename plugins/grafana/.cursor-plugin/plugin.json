@@ -1,0 +1,13 @@
+{
+  "name": "grafana",
+  "displayName": "Grafana",
+  "version": "0.1.0",
+  "description": "Grafana plugin with MCP server for AI-assisted dashboard, datasource, alerting, and incident management.",
+  "author": {
+    "name": "Grafana Labs",
+    "email": "plugins@grafana.com"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["grafana", "mcp", "observability", "dashboards", "prometheus", "loki"],
+  "logo": "assets/logo.svg"
+}
