@@ -1,0 +1,18 @@
+{
+  "name": "grafana-cursor-plugin",
+  "owner": {
+    "name": "Grafana Labs",
+    "email": "plugins@grafana.com"
+  },
+  "metadata": {
+    "description": "Grafana plugins for Cursor",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "grafana",
+      "source": "./plugins/grafana",
+      "description": "Grafana plugin for AI-assisted observability workflows"
+    }
+  ]
+}
