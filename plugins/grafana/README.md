@@ -6,6 +6,7 @@ Cursor plugin that exposes the official [Grafana MCP server](https://github.com/
 
 - `mcp.json` — MCP server configuration for `mcp-grafana` (via Docker)
 - `rules/grafana-assistant.mdc` — best practices for using Grafana tools effectively
+- `skills/grafana-assistant-cli/SKILL.md` — skill for using the `grafana-assistant` CLI to interact with Grafana Assistant via A2A API
 
 ## Prerequisites
 
