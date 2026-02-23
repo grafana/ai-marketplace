@@ -2,7 +2,7 @@
   "name": "grafana-ai-marketplace",
   "owner": {
     "name": "Grafana Labs",
-    "email": "plugins@grafana.com"
+    "email": "grafana-assistant@grafana.com"
   },
   "metadata": {
     "description": "Grafana plugins for Cursor",

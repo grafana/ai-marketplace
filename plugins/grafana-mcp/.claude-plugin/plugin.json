@@ -5,7 +5,7 @@
   "description": "MCP server for AI-assisted Grafana dashboard, datasource, alerting, and incident management.",
   "author": {
     "name": "Grafana Labs",
-    "email": "plugins@grafana.com"
+    "email": "grafana-assistant@grafana.com"
   },
   "license": "Apache-2.0",
   "keywords": ["grafana", "mcp", "observability", "dashboards", "prometheus", "loki"],
