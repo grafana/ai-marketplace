@@ -11,14 +11,20 @@
   },
   "plugins": [
     {
-      "name": "grafana-assistant",
-      "source": "plugins/grafana-assistant",
-      "description": "Skills and rules for developing and using the Grafana Assistant app and CLI"
-    },
-    {
-      "name": "grafana-mcp",
-      "source": "plugins/grafana-mcp",
-      "description": "MCP server for AI-assisted Grafana dashboard, datasource, alerting, and incident management"
+      "name": "grafana",
+      "description": "Grafana plugin suite for Cursor",
+      "plugins": [
+        {
+          "name": "grafana-assistant",
+          "source": "plugins/grafana-assistant",
+          "description": "Skills and rules for developing and using the Grafana Assistant app and CLI"
+        },
+        {
+          "name": "grafana-mcp",
+          "source": "plugins/grafana-mcp",
+          "description": "MCP server for AI-assisted Grafana dashboard, datasource, alerting, and incident management"
+        }
+      ]
     }
   ]
 }
