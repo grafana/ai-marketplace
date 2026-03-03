@@ -1,6 +1,6 @@
 # Grafana AI Marketplace
 
-Dual-format plugin marketplace that exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) for AI-assisted observability workflows in both **Cursor** and **Claude Code**.
+Triple-format plugin marketplace that exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) for AI-assisted observability workflows in **Cursor**, **Claude Code**, and **Kiro**.
 
 ## Getting started
 
@@ -17,33 +17,37 @@ Dual-format plugin marketplace that exposes the official [Grafana MCP server](ht
 
    For Grafana Cloud, use your instance URL instead (e.g. `https://myinstance.grafana.net`).
 
-4. Install the plugin from the Cursor Marketplace or Claude Code plugin registry.
+4. Install the plugin from the Cursor Marketplace, Claude Code plugin registry, or Kiro Powers panel.
 
 ## What's included
 
-- **MCP server** (`mcp.json`) — runs the official `grafana/mcp-grafana` Docker image in stdio mode, providing 40+ tools for dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, annotations, and more.
+- **MCP server** (`mcp.json`) — runs the official `grafana/mcp-grafana` Docker image in stdio mode, providing 50+ tools for dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, annotations, and more.
 - **Rule** (`rules/grafana-assistant.mdc`) — best practices for using Grafana MCP tools effectively (context window management, write safety, deeplinks).
+- **Kiro steering** (`steering/`) — workflow-specific guidance files loaded on-demand by Kiro.
 
-See [plugins/grafana/README.md](plugins/grafana/README.md) for the full tool reference.
+See [plugins/grafana-mcp/README.md](plugins/grafana-mcp/README.md) for the full tool reference.
 
-## Dual-format architecture
+## Triple-format architecture
 
-Each plugin ships manifests for both platforms while sharing all content (rules, skills, MCP config):
+Each plugin ships manifests for all three platforms while sharing all content (rules, skills, MCP config):
 
 ```text
-plugins/grafana/
+plugins/grafana-mcp/
 ├── .cursor-plugin/plugin.json   # Cursor manifest
 ├── .claude-plugin/plugin.json   # Claude Code manifest
+├── POWER.md                     # Kiro manifest (frontmatter + onboarding)
 ├── mcp.json                     # Shared MCP server config
-└── rules/                       # Shared rules
+├── rules/                       # Shared rules
+└── steering/                    # Kiro steering files
 ```
 
 Root marketplace manifests:
 
 - `.cursor-plugin/marketplace.json` — Cursor Marketplace
 - `.claude-plugin/marketplace.json` — Claude Code plugin registry
+- `.kiro-power/marketplace.json` — Kiro Powers registry
 
-Versions are kept in sync across both formats and validated in CI.
+Versions are kept in sync across all three formats and validated in CI.
 
 ## Development
 
@@ -53,4 +57,4 @@ To validate the plugin structure (both formats):
 node scripts/validate-template.mjs
 ```
 
-To add more plugins, create a new directory under `plugins/` and register it in both marketplace manifests. See `docs/add-a-plugin.md` for details.
+To add more plugins, create a new directory under `plugins/` and register it in all three marketplace manifests. See `docs/add-a-plugin.md` for details.

@@ -1,0 +1,24 @@
+{
+  "name": "grafana-ai-marketplace",
+  "owner": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com"
+  },
+  "metadata": {
+    "description": "Grafana powers for Kiro",
+    "version": "0.1.0",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "grafana-assistant",
+      "source": "plugins/grafana-assistant",
+      "description": "Skills and rules for developing and using the Grafana Assistant app and CLI"
+    },
+    {
+      "name": "grafana-mcp",
+      "source": "plugins/grafana-mcp",
+      "description": "MCP server for AI-assisted Grafana dashboard, datasource, alerting, and incident management"
+    }
+  ]
+}
