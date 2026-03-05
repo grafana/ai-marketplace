@@ -19,6 +19,21 @@ Dual-format plugin marketplace that exposes the official [Grafana MCP server](ht
 
 4. Install the plugin from the Cursor Marketplace or Claude Code plugin registry.
 
+### Add plugins in Claude Code
+
+From any Claude Code session, add this marketplace from GitHub:
+
+```shell
+/plugin marketplace add grafana/ai-marketplace
+```
+
+Install plugins from this marketplace (`grafana-ai-marketplace`):
+
+```shell
+/plugin install grafana-assistant@grafana-ai-marketplace
+/plugin install grafana-mcp@grafana-ai-marketplace
+```
+
 ## What's included
 
 - **MCP server** (`mcp.json`) — runs the official `grafana/mcp-grafana` Docker image in stdio mode, providing 40+ tools for dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, annotations, and more.

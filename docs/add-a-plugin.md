@@ -68,7 +68,29 @@ node scripts/validate-template.mjs
 
 The script validates both formats and checks cross-format consistency. Fix all reported errors before committing.
 
-## 5. Common pitfalls
+## 5. Test in Claude Code
+
+From any Claude Code session, add (or refresh) the marketplace from GitHub:
+
+```shell
+/plugin marketplace add grafana/ai-marketplace
+/plugin marketplace update grafana-ai-marketplace
+```
+
+Install your new plugin from the marketplace:
+
+```shell
+/plugin install my-new-plugin@grafana-ai-marketplace
+```
+
+If it was already installed, reinstall to pick up local changes:
+
+```shell
+/plugin uninstall my-new-plugin@grafana-ai-marketplace
+/plugin install my-new-plugin@grafana-ai-marketplace
+```
+
+## 6. Common pitfalls
 
 - Plugin `name` not kebab-case.
 - `source` path in marketplace manifest does not match folder name.

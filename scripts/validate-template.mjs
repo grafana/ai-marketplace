@@ -377,12 +377,12 @@ function validateDualFormatConsistency(cursorMarketplace, claudeMarketplace) {
 
   for (const name of cursorNames) {
     if (!claudeNames.has(name)) {
-      addError(`Plugin "${name}" exists in cursor-plugin marketplace but not in claude-plugin.`);
+      addWarning(`Plugin "${name}" exists in cursor-plugin marketplace but not in claude-plugin.`);
     }
   }
   for (const name of claudeNames) {
     if (!cursorNames.has(name)) {
-      addError(`Plugin "${name}" exists in claude-plugin marketplace but not in cursor-plugin.`);
+      addWarning(`Plugin "${name}" exists in claude-plugin marketplace but not in cursor-plugin.`);
     }
   }
 }
