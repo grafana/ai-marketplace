@@ -9,5 +9,7 @@
   },
   "license": "Apache-2.0",
   "keywords": ["grafana", "assistant", "a2a", "cli"],
+  "rules": "rules",
+  "skills": "skills",
   "logo": "assets/logo.svg"
 }

@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "grafana-assistant",
-      "source": "plugins/grafana-assistant",
+      "source": "grafana-assistant",
       "description": "Skills and rules for developing and using the Grafana Assistant app and CLI"
     }
   ]
