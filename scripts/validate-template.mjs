@@ -9,6 +9,7 @@ const errors = [];
 const warnings = [];
 
 const FORMATS = ["cursor-plugin", "claude-plugin"];
+const KIRO_FORMAT = "kiro-power";
 
 const pluginNamePattern = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 const marketplaceNamePattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
@@ -419,6 +420,161 @@ async function validatePluginVersionConsistency() {
   }
 }
 
+async function readPowerMdFrontmatter(filePath, context) {
+  let content;
+  try {
+    content = await fs.readFile(filePath, "utf8");
+  } catch {
+    addError(`${context} is missing: ${filePath}`);
+    return null;
+  }
+
+  const parsed = parseFrontmatter(content);
+  if (!parsed) {
+    addError(`${context} missing YAML frontmatter: ${filePath}`);
+    return null;
+  }
+
+  return parsed;
+}
+
+async function validateKiroFormat() {
+  const marketplacePath = path.join(repoRoot, `.${KIRO_FORMAT}`, "marketplace.json");
+  const marketplace = await readJsonFile(marketplacePath, `[${KIRO_FORMAT}] Marketplace manifest`);
+  if (!marketplace) {
+    return null;
+  }
+
+  if (typeof marketplace.name !== "string" || !marketplaceNamePattern.test(marketplace.name)) {
+    addError(
+      `[${KIRO_FORMAT}] Marketplace "name" must be lowercase kebab-case and start/end with an alphanumeric character.`
+    );
+  }
+
+  if (!marketplace.owner || typeof marketplace.owner.name !== "string" || marketplace.owner.name.length === 0) {
+    addError(`[${KIRO_FORMAT}] Marketplace "owner.name" is required.`);
+  }
+
+  if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length === 0) {
+    addError(`[${KIRO_FORMAT}] Marketplace "plugins" must be a non-empty array.`);
+    return marketplace;
+  }
+
+  const pluginRoot = marketplace.metadata?.pluginRoot;
+  if (pluginRoot !== undefined) {
+    if (typeof pluginRoot !== "string" || !isSafeRelativePath(pluginRoot)) {
+      addError(`[${KIRO_FORMAT}] Marketplace "metadata.pluginRoot" must be a safe relative path.`);
+    } else {
+      const pluginRootAbs = path.join(repoRoot, pluginRoot);
+      await ensureDirectory(pluginRootAbs, `[${KIRO_FORMAT}] Marketplace "metadata.pluginRoot"`);
+    }
+  }
+
+  const seenNames = new Set();
+  for (const [index, entry] of marketplace.plugins.entries()) {
+    const label = `[${KIRO_FORMAT}] plugins[${index}]`;
+
+    if (!entry || typeof entry !== "object") {
+      addError(`${label} must be an object.`);
+      continue;
+    }
+
+    if (typeof entry.name !== "string" || !pluginNamePattern.test(entry.name)) {
+      addError(`${label}.name must be lowercase and use only alphanumerics, hyphens, and periods.`);
+      continue;
+    }
+
+    if (seenNames.has(entry.name)) {
+      addError(`[${KIRO_FORMAT}] Duplicate plugin name in marketplace manifest: "${entry.name}"`);
+    }
+    seenNames.add(entry.name);
+
+    const sourcePath = resolveMarketplaceSource(entry.source, pluginRoot ?? "");
+    if (!sourcePath) {
+      addError(`${label}.source must be a string path.`);
+      continue;
+    }
+    if (!isSafeRelativePath(sourcePath)) {
+      addError(`${label}.source is not a safe relative path: "${sourcePath}"`);
+      continue;
+    }
+
+    const pluginDir = path.join(repoRoot, sourcePath);
+    const pluginDirExists = await ensureDirectory(pluginDir, `${label}.source`);
+    if (!pluginDirExists) {
+      continue;
+    }
+
+    // Kiro powers use POWER.md frontmatter instead of plugin.json
+    const powerMdPath = path.join(pluginDir, "POWER.md");
+    const frontmatter = await readPowerMdFrontmatter(powerMdPath, `[${KIRO_FORMAT}] ${entry.name} POWER.md`);
+    if (!frontmatter) {
+      continue;
+    }
+
+    for (const key of ["name", "displayName", "description", "keywords"]) {
+      if (!frontmatter[key] || frontmatter[key].length === 0) {
+        addError(`[${KIRO_FORMAT}] ${entry.name}: POWER.md frontmatter missing required field "${key}".`);
+      }
+    }
+
+    const powerName = frontmatter.name?.replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1");
+    if (powerName && powerName !== entry.name) {
+      addError(
+        `[${KIRO_FORMAT}] ${entry.name}: marketplace entry name does not match POWER.md name ("${powerName}").`
+      );
+    }
+
+    // Validate steering directory files if present
+    const steeringDir = path.join(pluginDir, "steering");
+    if (await pathExists(steeringDir)) {
+      const stat = await fs.stat(steeringDir);
+      if (!stat.isDirectory()) {
+        addError(`[${KIRO_FORMAT}] ${entry.name}: "steering" exists but is not a directory.`);
+      }
+    }
+
+    // mcp.json is optional for Kiro powers
+    const mcpPath = path.join(pluginDir, "mcp.json");
+    if (!(await pathExists(mcpPath))) {
+      addWarning(`[${KIRO_FORMAT}] ${entry.name}: no mcp.json file found (only needed when using MCP servers).`);
+    }
+  }
+
+  return marketplace;
+}
+
+function validateTripleFormatConsistency(cursorMarketplace, claudeMarketplace, kiroMarketplace) {
+  if (!kiroMarketplace) {
+    return;
+  }
+
+  const kiroNames = new Set((kiroMarketplace.plugins ?? []).map((p) => p.name));
+
+  if (cursorMarketplace) {
+    const cursorNames = new Set((cursorMarketplace.plugins ?? []).map((p) => p.name));
+    for (const name of kiroNames) {
+      if (!cursorNames.has(name)) {
+        addError(`Plugin "${name}" exists in kiro-power marketplace but not in cursor-plugin.`);
+      }
+    }
+    for (const name of cursorNames) {
+      if (!kiroNames.has(name)) {
+        addError(`Plugin "${name}" exists in cursor-plugin marketplace but not in kiro-power.`);
+      }
+    }
+  }
+
+  if (claudeMarketplace) {
+    const claudeNames = new Set((claudeMarketplace.plugins ?? []).map((p) => p.name));
+    for (const name of kiroNames) {
+      if (!claudeNames.has(name)) {
+        addError(`Plugin "${name}" exists in kiro-power marketplace but not in claude-plugin.`);
+      }
+    }
+  }
+}
+
 async function main() {
   const results = {};
   for (const format of FORMATS) {
@@ -427,6 +583,9 @@ async function main() {
 
   validateDualFormatConsistency(results["cursor-plugin"], results["claude-plugin"]);
   await validatePluginVersionConsistency();
+
+  const kiroMarketplace = await validateKiroFormat();
+  validateTripleFormatConsistency(results["cursor-plugin"], results["claude-plugin"], kiroMarketplace);
 
   summarizeAndExit();
 }
@@ -448,7 +607,7 @@ function summarizeAndExit() {
     process.exit(1);
   }
 
-  console.log("Validation passed (cursor-plugin + claude-plugin).");
+  console.log("Validation passed (cursor-plugin + claude-plugin + kiro-power).");
 }
 
 await main();
