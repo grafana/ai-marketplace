@@ -15,20 +15,13 @@ Hosted MCP server providing 60+ Grafana Cloud tools via Streamable HTTP transpor
 
 ## Configuration
 
-The Cloud MCP server connects via `https://mcp.grafana.com/mcp` using Streamable HTTP transport.
-
-### Environment variables
-
-| Variable | Description |
-|---|---|
-| `GRAFANA_URL` | Your Grafana Cloud instance URL (e.g. `https://mystack.grafana.net`). Used as the `X-Grafana-URL` header to skip the URL entry step during OAuth |
+The Cloud MCP server connects via `https://mcp.grafana.com/mcp` using Streamable HTTP transport. No local installation or environment variables are required.
 
 ### Setup steps
 
-1. Set `GRAFANA_URL` to your Grafana Cloud instance URL.
-2. The MCP server connects automatically when the plugin loads.
-3. When prompted, authorize the connection in your browser.
-4. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
+1. The MCP server connects automatically when the plugin loads.
+2. When prompted, enter your Grafana Cloud URL and authorize the connection in your browser.
+3. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
 
 ## Read and write access
 

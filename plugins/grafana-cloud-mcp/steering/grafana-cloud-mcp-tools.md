@@ -4,11 +4,7 @@ Hosted MCP server providing 60+ Grafana Cloud tools via Streamable HTTP with OAu
 
 ## Configuration
 
-### Environment variables
-
-| Variable | Description |
-|---|---|
-| `GRAFANA_URL` | Your Grafana Cloud instance URL (e.g. `https://mystack.grafana.net`). Used as the `X-Grafana-URL` header to skip the URL entry step during OAuth |
+No local installation or environment variables required. The server connects via `https://mcp.grafana.com/mcp` using Streamable HTTP. When prompted, enter your Grafana Cloud URL and authorize in your browser.
 
 ## Read and write access
 

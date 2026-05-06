@@ -21,21 +21,11 @@ The Cloud MCP server works only with hosted Grafana Cloud environments. Self-hos
 
 You need the **Assistant Cloud MCP User** role or the `grafana-assistant-app.cloud-mcp:access` permission. Users with **Editor** role or higher have this by default.
 
-### Step 2: Set environment variable
+### Step 2: MCP server connects automatically
 
-Set `GRAFANA_URL` to your Grafana Cloud instance URL:
+The `grafana-cloud` MCP server defined in `mcp.json` connects automatically when Kiro loads this power. No local installation or environment variables are required.
 
-```bash
-export GRAFANA_URL="https://<your-stack>.grafana.net"
-```
-
-This is used as the `X-Grafana-URL` header to skip the URL entry step during authorization.
-
-### Step 3: MCP server connects automatically
-
-Once the environment variable is set, the `grafana-cloud` MCP server defined in `mcp.json` connects automatically when Kiro loads this power.
-
-When prompted, authorize the connection in your browser. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
+When prompted, enter your Grafana Cloud URL and authorize the connection in your browser. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
 
 ## When to Load Steering Files
 

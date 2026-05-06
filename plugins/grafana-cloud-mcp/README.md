@@ -12,13 +12,7 @@ Unlike the local [grafana-mcp](../grafana-mcp/) plugin which runs via Docker, th
 
 ## Setup
 
-Set the `GRAFANA_URL` environment variable to your Grafana Cloud instance URL:
-
-```bash
-export GRAFANA_URL="https://<your-stack>.grafana.net"
-```
-
-When your AI agent first connects, authorize the connection in your browser. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
+No local installation or environment variables required. When your AI agent first connects, you'll be prompted to enter your Grafana Cloud URL and authorize the connection in your browser. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
 
 ## Available tools
 
