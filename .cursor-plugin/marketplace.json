@@ -16,6 +16,11 @@
       "description": "Skills and rules for developing and using the Grafana Assistant app and CLI"
     },
     {
+      "name": "grafana-mcp",
+      "source": "grafana-mcp",
+      "description": "MCP server for AI-assisted Grafana dashboard, datasource, alerting, and incident management"
+    },
+    {
       "name": "grafana-cloud-mcp",
       "source": "grafana-cloud-mcp",
       "description": "Hosted MCP server for AI-assisted Grafana Cloud observability — no local installation required"
