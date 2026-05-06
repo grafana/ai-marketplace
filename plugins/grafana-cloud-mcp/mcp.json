@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "grafana-cloud": {
+      "url": "https://mcp.grafana.com/mcp",
+      "headers": {
+        "X-Grafana-URL": "${GRAFANA_URL}"
+      }
+    }
+  }
+}
