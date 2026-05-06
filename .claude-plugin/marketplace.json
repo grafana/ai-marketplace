@@ -18,6 +18,11 @@
       "name": "grafana-mcp",
       "source": "./plugins/grafana-mcp",
       "description": "MCP server for AI-assisted Grafana dashboard, datasource, alerting, and incident management"
+    },
+    {
+      "name": "grafana-cloud-mcp",
+      "source": "./plugins/grafana-cloud-mcp",
+      "description": "Hosted MCP server for AI-assisted Grafana Cloud observability — no local installation required"
     }
   ]
 }
