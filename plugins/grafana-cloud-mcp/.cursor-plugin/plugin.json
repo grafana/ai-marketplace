@@ -1,7 +1,7 @@
 {
   "name": "grafana-cloud-mcp",
   "displayName": "Grafana Cloud MCP",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Hosted MCP server for AI-assisted Grafana Cloud observability — no local installation required.",
   "author": {
     "name": "Grafana Labs",
