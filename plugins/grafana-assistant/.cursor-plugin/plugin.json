@@ -1,7 +1,7 @@
 {
   "name": "grafana-assistant",
   "displayName": "Grafana Assistant",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Skills and rules for developing and using the Grafana Assistant app and CLI.",
   "author": {
     "name": "Grafana Labs",
