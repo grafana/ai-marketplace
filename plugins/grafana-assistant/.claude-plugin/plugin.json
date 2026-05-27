@@ -6,6 +6,8 @@
     "name": "Grafana Labs",
     "email": "grafana-assistant@grafana.com"
   },
+  "homepage": "https://github.com/grafana/ai-marketplace/tree/main/plugins/grafana-assistant",
+  "repository": "https://github.com/grafana/ai-marketplace",
   "license": "Apache-2.0",
   "keywords": ["grafana", "assistant", "a2a", "cli"]
 }
