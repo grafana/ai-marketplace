@@ -5,7 +5,7 @@
     "email": "grafana-assistant@grafana.com"
   },
   "metadata": {
-    "description": "Grafana plugins for Cursor",
+    "description": "Grafana plugins for Claude Code",
     "version": "0.1.0"
   },
   "plugins": [
