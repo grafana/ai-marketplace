@@ -10,14 +10,27 @@ Cursor plugin that exposes the official [Grafana MCP server](https://github.com/
 
 2. Create a [service account](https://grafana.com/docs/grafana/latest/administration/service-accounts/) in Grafana with at least **Viewer** role (or **Editor** for write operations). Generate a token.
 
-3. Set environment variables:
+## Setup
 
-   ```bash
-   export GRAFANA_URL="http://localhost:3000"
-   export GRAFANA_SERVICE_ACCOUNT_TOKEN="<your token>"
-   ```
+### Claude Code
 
-   For Grafana Cloud, use your instance URL instead (e.g. `https://myinstance.grafana.net`).
+When you enable the plugin, Claude Code prompts you for:
+
+- **Grafana instance URL** — e.g. `http://localhost:3000` for local, or `https://<stack>.grafana.net` for Grafana Cloud
+- **Service account token** — stored in your system keychain
+
+No shell environment variables required.
+
+### Cursor
+
+Export the environment variables before launching Cursor:
+
+```bash
+export GRAFANA_URL="http://localhost:3000"
+export GRAFANA_SERVICE_ACCOUNT_TOKEN="<your token>"
+```
+
+For Grafana Cloud, use your instance URL instead (e.g. `https://myinstance.grafana.net`).
 
 ## Available tools
 
