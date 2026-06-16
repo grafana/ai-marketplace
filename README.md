@@ -12,7 +12,7 @@ Plugin marketplace that exposes the official [Grafana MCP server](https://github
 
 ```bash
    export GRAFANA_URL="http://localhost:3000"
-   export GRAFANA_SERVICE_ACCOUNT_TOKEN=""
+   export GRAFANA_SERVICE_ACCOUNT_TOKEN="<your token>"
 ```
 
    For Grafana Cloud, use your instance URL instead (e.g. `https://myinstance.grafana.net`).
