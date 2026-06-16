@@ -1,6 +1,6 @@
 # Grafana AI Marketplace
 
-Triple-format plugin marketplace that exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) for AI-assisted observability workflows in **Cursor**, **Claude Code**, and **Kiro**.
+Plugin marketplace that exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) for AI-assisted observability workflows in **Cursor**, **Claude Code**, **Kiro**, and **Grok Build**.
 
 ## Getting started
 
@@ -10,14 +10,14 @@ Triple-format plugin marketplace that exposes the official [Grafana MCP server](
 
 3. Set environment variables:
 
-   ```bash
+```bash
    export GRAFANA_URL="http://localhost:3000"
-   export GRAFANA_SERVICE_ACCOUNT_TOKEN="<your token>"
-   ```
+   export GRAFANA_SERVICE_ACCOUNT_TOKEN=""
+```
 
    For Grafana Cloud, use your instance URL instead (e.g. `https://myinstance.grafana.net`).
 
-4. Install the plugin from the Cursor Marketplace, Claude Code plugin registry, or Kiro Powers panel.
+4. Install the plugin from the Cursor Marketplace, Claude Code plugin registry, Kiro Powers panel, or Grok Build Plugin Marketplace.
 
 ### Add plugins in Claude Code
 
@@ -42,14 +42,15 @@ Install plugins from this marketplace (`grafana-ai-marketplace`):
 
 See [plugins/grafana-mcp/README.md](plugins/grafana-mcp/README.md) for the full tool reference.
 
-## Triple-format architecture
+## Architecture
 
-Each plugin ships manifests for all three platforms while sharing all content (rules, skills, MCP config):
+Each plugin ships manifests for all four platforms while sharing all content (rules, skills, MCP config):
 
 ```text
 plugins/grafana-mcp/
 ├── .cursor-plugin/plugin.json   # Cursor manifest
 ├── .claude-plugin/plugin.json   # Claude Code manifest
+├── .grok-plugin/plugin.json     # Grok Build manifest
 ├── POWER.md                     # Kiro manifest (frontmatter + onboarding)
 ├── mcp.json                     # Shared MCP server config
 ├── rules/                       # Shared rules
@@ -60,9 +61,10 @@ Root marketplace manifests:
 
 - `.cursor-plugin/marketplace.json` — Cursor Marketplace
 - `.claude-plugin/marketplace.json` — Claude Code plugin registry
+- `.grok-plugin/marketplace.json` — Grok Build plugin marketplace
 - `.kiro-power/marketplace.json` — Kiro Powers registry
 
-Versions are kept in sync across all three formats and validated in CI.
+Versions are kept in sync across all four formats and validated in CI.
 
 ## Development
 
@@ -72,4 +74,4 @@ To validate the plugin structure (both formats):
 node scripts/validate-template.mjs
 ```
 
-To add more plugins, create a new directory under `plugins/` and register it in all three marketplace manifests. See `docs/add-a-plugin.md` for details.
+To add more plugins, create a new directory under `plugins/` and register it in all four marketplace manifests. See `docs/add-a-plugin.md` for details.
