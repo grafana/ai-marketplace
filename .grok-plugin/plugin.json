@@ -1,0 +1,18 @@
+{
+  "name": "grafana",
+  "version": "1.0.0",
+  "description": "MCP-based observability tools for Grafana — dashboards, Prometheus, Loki, alerting, incidents, and OnCall.",
+  "author": {
+    "name": "Grafana Labs",
+    "url": "https://grafana.com"
+  },
+  "repository": "https://github.com/grafana/ai-marketplace",
+  "license": "Apache-2.0",
+  "keywords": ["grafana", "grafana mcp", "grafana cloud", "observability"],
+  "skills": [
+    "plugins/grafana-mcp/skills/grafana-mcp-tools",
+    "plugins/grafana-assistant/skills/grafana-assistant-cli",
+    "plugins/grafana-cloud-mcp/skills/grafana-cloud-mcp-tools"
+  ],
+  "mcpServers": "plugins/grafana-mcp/.mcp.json"
+}
