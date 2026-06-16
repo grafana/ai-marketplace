@@ -1,0 +1,46 @@
+{
+  "name": "grafana-ai-marketplace",
+  "description": "Grafana plugins for Grok Build",
+  "owner": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com"
+  },
+  "plugins": [
+    {
+      "name": "grafana-assistant",
+      "description": "Skills and rules for developing and using the Grafana Assistant app and CLI.",
+      "category": "monitoring",
+      "source": {
+        "type": "local",
+        "path": "./plugins/grafana-assistant"
+      },
+      "homepage": "https://github.com/grafana/ai-marketplace",
+      "keywords": ["grafana", "grafana assistant"],
+      "domains": ["grafana.com", "grafana.net"]
+    },
+    {
+      "name": "grafana-mcp",
+      "description": "MCP server for AI-assisted Grafana observability — dashboards, datasources, Prometheus, Loki, alerting, incidents, and OnCall.",
+      "category": "monitoring",
+      "source": {
+        "type": "local",
+        "path": "./plugins/grafana-mcp"
+      },
+      "homepage": "https://github.com/grafana/mcp-grafana",
+      "keywords": ["grafana", "grafana mcp"],
+      "domains": ["grafana.com", "grafana.net"]
+    },
+    {
+      "name": "grafana-cloud-mcp",
+      "description": "Hosted MCP server for AI-assisted Grafana Cloud observability — no local installation required.",
+      "category": "monitoring",
+      "source": {
+        "type": "local",
+        "path": "./plugins/grafana-cloud-mcp"
+      },
+      "homepage": "https://grafana.com/products/cloud/",
+      "keywords": ["grafana cloud", "grafana cloud mcp"],
+      "domains": ["grafana.com", "grafana.net"]
+    }
+  ]
+}
