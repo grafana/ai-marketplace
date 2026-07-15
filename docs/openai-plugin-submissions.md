@@ -8,11 +8,11 @@ This document prepares two separate Grafana submissions for the OpenAI plugin di
 
 **MCP server:** `https://mcp.grafana.com/mcp`
 
-**Short description:** Connect AI assistants directly to your Grafana Cloud stack to query metrics, logs, traces, and profiles, investigate incidents, and act on dashboards and alerts—all through a single hosted MCP endpoint with no self-hosting required.
+**Short description:** Connect Codex directly to your Grafana Cloud stack to query metrics, logs, traces, and profiles, investigate incidents, and act on dashboards and alerts—all through a single hosted MCP endpoint with no self-hosting required.
 
 **Long description:**
 
-The Grafana Cloud hosted MCP server gives AI agents secure, authenticated access to your full observability stack via the Model Context Protocol. It exposes Grafana Cloud's core APIs as tools an agent can call directly, eliminating the need to run or maintain a local MCP server.
+The Grafana Cloud hosted MCP server gives Codex secure, authenticated access to your full observability stack via the Model Context Protocol. It exposes Grafana Cloud's core APIs as tools Codex can call directly, eliminating the need to run or maintain a local MCP server.
 
 Capabilities:
 
@@ -24,13 +24,13 @@ Capabilities:
 
 Common use cases:
 
-- **Troubleshooting with natural language:** Ask questions such as, "Why is checkout latency spiking?" and the agent will pull the right metrics, logs, and traces in one flow.
+- **Troubleshooting with natural language:** Ask questions such as, "Why is checkout latency spiking?" and Codex will pull the right metrics, logs, and traces in one flow.
 - **On-call copilot work:** Summarize active incidents, draft status updates, and surface relevant runbooks.
 - **Dashboard authoring and tuning:** Use natural language to quickly build and edit visualizations.
 - **SRE and platform-team automation:** Perform bulk dashboard audits, alert hygiene reviews, and data source inventory checks.
-- **Embedding Grafana context into broader agent workflows:** Help Claude, Cursor or other internal copilots understand your observability stack—without having to set up local dependencies.
+- **Embedding Grafana context into Codex workflows:** Help Codex understand your observability stack—without having to set up local dependencies.
 
-Authentication uses Grafana Cloud access policies, so agent permissions are scoped to the same RBAC model as the rest of your stack.
+Authentication uses Grafana Cloud access policies, so Codex's permissions are scoped to the same RBAC model as the rest of your stack.
 
 **Starter prompts:**
 
