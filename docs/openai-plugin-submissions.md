@@ -4,6 +4,11 @@ A durable maintainer runbook for submitting **Grafana Cloud MCP** to the OpenAI 
 
 Do not add credentials, fixture URLs, tokens, or placeholders to this repository. Values that identify accounts, stacks, or secrets belong only in the OpenAI portal and in Grafana-internal systems.
 
+## Responsibilities
+
+- **This repository** provides the packaged plugin (`grafana-cloud-mcp`), the bundled skill, and this runbook.
+- **The OpenAI Platform submitter (portal owner)** is responsible for the portal-side work OpenAI requires directly of the submitter: running the production tool scan, providing reviewer credentials, and entering the tests, listing values, attestations, and availability. The test cases and portal checklist below are the source material the submitter uses; they are not automated by this repository.
+
 ## Product model
 
 - **Submission type:** With MCP (app-plus-skills).
@@ -29,7 +34,7 @@ Exactly five positive and three negative tests. Every test runs against the revi
 
 ### Positive tests
 
-1. **Grafana Assistant (`ask_assistant`):** With the reviewer OAuth account authorized including `grafana:write` (which `ask_assistant` requires), ask Grafana Assistant to summarize a fixture service's elevated error rate in the last hour. Expect a grounded summary for the authorized fixture stack.
+1. **Grafana Assistant (`ask_assistant`):** With the reviewer OAuth account (Assistant Admin / Org Admin) authorized and `grafana:write` granted at consent — the scope `ask_assistant` requires — ask Grafana Assistant to summarize a fixture service's elevated error rate in the last hour. Expect a grounded summary for the authorized fixture stack.
 2. Query a fixture service's error-rate metric and related Loki logs for the last hour. Expect a metric and log investigation with a concise summary.
 3. Search for a known fixture dashboard and retrieve a compact summary. Expect dashboard discovery and a link or identifier for the dashboard.
 4. List active fixture incidents and retrieve details for one incident. Expect incident data only for the authorized Grafana stack.
@@ -60,7 +65,7 @@ MCP configuration:
 
 Review access:
 
-- A **reviewer account and fixture stack** that work without MFA, SMS, email confirmation, or private-network access, and that grant `grafana:write` so the `ask_assistant` and write tests can be exercised.
+- A **reviewer account and fixture stack** that work without MFA, SMS, email confirmation, or private-network access. The reviewer account must hold the **Assistant Admin** role (or Organization Admin) so it can grant `grafana:write` during OAuth consent — the write scope the `ask_assistant` and write tests require. An account with only read-level roles cannot grant write, even though the tool exists.
 
 Skill bundle:
 
@@ -73,7 +78,7 @@ Publication:
 
 ## Owners still required
 
-- **Grafana infrastructure:** reviewer fixture stack + reviewer OAuth account (no MFA/SMS/email/private-network gating; `grafana:write` granted); domain-verification token if the portal requests it.
+- **Grafana infrastructure:** reviewer fixture stack + reviewer OAuth account (no MFA/SMS/email/private-network gating; holds **Assistant Admin** or Org Admin so it can grant `grafana:write` at consent); domain-verification token if the portal requests it.
 - **Grafana product:** approval to publish publicly while Cloud MCP is in public preview.
 - **Grafana legal/brand:** final public website, support, privacy, and terms URLs, and business identity.
 - **OpenAI Platform owner:** Apps Management: Write access and the verified business identity in the publishing org.
