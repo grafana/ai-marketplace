@@ -575,6 +575,117 @@ function validateTripleFormatConsistency(cursorMarketplace, claudeMarketplace, k
   }
 }
 
+async function validateCodexFormat() {
+  const marketplacePath = path.join(repoRoot, ".agents", "plugins", "marketplace.json");
+  if (!(await pathExists(marketplacePath))) {
+    // Codex marketplace is optional.
+    return null;
+  }
+
+  const marketplace = await readJsonFile(marketplacePath, "[codex] Marketplace manifest");
+  if (!marketplace) {
+    return null;
+  }
+
+  if (typeof marketplace.name !== "string" || !marketplaceNamePattern.test(marketplace.name)) {
+    addError(
+      "[codex] Marketplace \"name\" must be lowercase kebab-case and start/end with an alphanumeric character."
+    );
+  }
+
+  if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length === 0) {
+    addError("[codex] Marketplace \"plugins\" must be a non-empty array.");
+    return marketplace;
+  }
+
+  const seenNames = new Set();
+  for (const [index, entry] of marketplace.plugins.entries()) {
+    const label = `[codex] plugins[${index}]`;
+
+    if (!entry || typeof entry !== "object") {
+      addError(`${label} must be an object.`);
+      continue;
+    }
+
+    if (typeof entry.name !== "string" || !pluginNamePattern.test(entry.name)) {
+      addError(`${label}.name must be lowercase and use only alphanumerics, hyphens, and periods.`);
+      continue;
+    }
+
+    if (seenNames.has(entry.name)) {
+      addError(`[codex] Duplicate plugin name in marketplace manifest: "${entry.name}"`);
+    }
+    seenNames.add(entry.name);
+
+    if (typeof entry.category !== "string" || entry.category.length === 0) {
+      addError(`[codex] ${entry.name}: "category" is required and must be a non-empty string.`);
+    }
+
+    if (!entry.policy || typeof entry.policy !== "object") {
+      addError(`[codex] ${entry.name}: "policy" is required and must be an object.`);
+    } else {
+      for (const key of ["installation", "authentication"]) {
+        if (typeof entry.policy[key] !== "string" || entry.policy[key].length === 0) {
+          addError(`[codex] ${entry.name}: "policy.${key}" is required and must be a non-empty string.`);
+        }
+      }
+    }
+
+    const sourcePath =
+      entry.source && typeof entry.source === "object" ? entry.source.path : undefined;
+    if (typeof sourcePath !== "string" || !isSafeRelativePath(sourcePath)) {
+      addError(`[codex] ${entry.name}: "source.path" must be a safe relative path.`);
+      continue;
+    }
+
+    const cleanedSource = sourcePath.replace(/^\.\//, "");
+    const pluginDir = path.join(repoRoot, cleanedSource);
+    const pluginDirExists = await ensureDirectory(pluginDir, `[codex] ${entry.name}: "source.path"`);
+    if (!pluginDirExists) {
+      continue;
+    }
+
+    const manifestPath = path.join(pluginDir, ".codex-plugin", "plugin.json");
+    const pluginManifest = await readJsonFile(manifestPath, `[codex] ${entry.name} plugin manifest`);
+    if (!pluginManifest) {
+      continue;
+    }
+
+    if (typeof pluginManifest.name !== "string" || !pluginNamePattern.test(pluginManifest.name)) {
+      addError(
+        `[codex] ${entry.name}: "name" in .codex-plugin/plugin.json must be lowercase and use only alphanumerics, hyphens, and periods.`
+      );
+    }
+    if (pluginManifest.name && pluginManifest.name !== entry.name) {
+      addError(
+        `[codex] ${entry.name}: marketplace entry name does not match .codex-plugin/plugin.json name ("${pluginManifest.name}").`
+      );
+    }
+
+    const referencedPaths = {
+      mcpServers: pluginManifest.mcpServers,
+      skills: pluginManifest.skills,
+      logo: pluginManifest.interface?.logo,
+    };
+    for (const [field, value] of Object.entries(referencedPaths)) {
+      for (const pathValue of extractPathValues(value)) {
+        await validateReferencedPath(pluginDir, field, pathValue, `[codex] ${entry.name}`);
+      }
+    }
+
+    if (typeof pluginManifest.mcpServers === "string") {
+      await readJsonFile(
+        path.join(pluginDir, pluginManifest.mcpServers),
+        `[codex] ${entry.name} MCP config`
+      );
+    }
+
+    await validateComponentFrontmatter(pluginDir, `[codex] ${entry.name}`);
+  }
+
+  return marketplace;
+}
+
 async function main() {
   const results = {};
   for (const format of FORMATS) {
@@ -586,6 +697,8 @@ async function main() {
 
   const kiroMarketplace = await validateKiroFormat();
   validateTripleFormatConsistency(results["cursor-plugin"], results["claude-plugin"], kiroMarketplace);
+
+  await validateCodexFormat();
 
   summarizeAndExit();
 }
@@ -607,7 +720,7 @@ function summarizeAndExit() {
     process.exit(1);
   }
 
-  console.log("Validation passed (cursor-plugin + claude-plugin + kiro-power).");
+  console.log("Validation passed (cursor-plugin + claude-plugin + kiro-power + codex).");
 }
 
 await main();

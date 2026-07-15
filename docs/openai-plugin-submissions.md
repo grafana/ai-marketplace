@@ -1,39 +1,20 @@
-# OpenAI Plugin Submission Packet
+# OpenAI Plugin Submission Runbook
 
-This document prepares a single Grafana submission for the OpenAI plugin directory (ChatGPT + Codex). The OpenAI Platform submitter must complete the portal fields, domain verification, tool scan, policy attestations, and final publication.
+A durable maintainer runbook for submitting **Grafana Cloud MCP** to the OpenAI plugin directory (ChatGPT + Codex) as a single **With MCP** app-plus-skills plugin. It packages the hosted Grafana Cloud MCP server together with the bundled `grafana-cloud-mcp-tools` skill.
 
-## Grafana Cloud MCP
+Do not add credentials, fixture URLs, tokens, or placeholders to this repository. Values that identify accounts, stacks, or secrets belong only in the OpenAI portal and in Grafana-internal systems.
 
-**Submission type:** With MCP (app-plus-skills)
+## Product model
 
-**MCP server:** `https://mcp.grafana.com/mcp`
+- **Submission type:** With MCP (app-plus-skills).
+- **MCP endpoint:** `https://mcp.grafana.com/mcp` (Streamable HTTP).
+- **Authentication:** Grafana Cloud MCP uses OAuth 2.1; access is user-scoped and limited by the user's Grafana RBAC. There is no local Docker, service-account token, CLI, tunnel, or filesystem/terminal component.
+- **Grafana Assistant:** available through the hosted MCP server via its `ask_assistant` tool (write-scoped, requires `grafana:write`), alongside the other Assistant-native tools (`describe_infrastructure`, `get_assertions`, `get_query_examples`) and the standard Grafana Cloud read/write tools.
+- **Skill bundle:** the final `grafana-cloud-mcp-tools` skill (`plugins/grafana-cloud-mcp/skills/grafana-cloud-mcp-tools/`). There is no separate Assistant skill.
 
-**Packaging:** One plugin, `grafana-cloud-mcp`, combining the hosted Grafana Cloud MCP server with a bundled Grafana Assistant skill. Grafana Assistant is not a separate CLI or app here — it is available **through the hosted MCP connection** via the server's `ask_assistant` capability, alongside the rest of the Grafana Cloud tools.
+## Listing copy
 
-**Short description:** Connect Codex to your Grafana Cloud stack to query metrics, logs, traces, and profiles, investigate incidents, act on dashboards and alerts, and ask Grafana Assistant—all through a single hosted MCP endpoint with no self-hosting required.
-
-**Long description:**
-
-The Grafana Cloud hosted MCP server gives Codex secure, authenticated access to your full observability stack — and to Grafana Assistant — via the Model Context Protocol. It exposes Grafana Cloud's core APIs and Assistant capabilities as tools Codex can call directly, eliminating the need to run or maintain a local MCP server.
-
-Capabilities:
-
-- **Grafana Assistant:** Ask Grafana Assistant natural-language questions through the hosted MCP `ask_assistant` capability to investigate data, summarize incidents, and explain signals.
-- **Metrics, logs, traces, profiles:** Query Prometheus/Mimir, Loki, Tempo, and Pyroscope data sources with native PromQL, LogQL, and TraceQL.
-- **Dashboards & data sources:** List, search, read, and update dashboards; inspect data source configuration and health.
-- **Alerting:** List and inspect alert rules with full configuration and state; create, update, and delete alert rules; list notification contact points.
-- **Incident response:** Create and update incidents in Grafana Cloud IRM, view on-call schedules, and pull on-call context.
-- **Admin & navigation:** Search across your Grafana Cloud instance, retrieve team and folder structure, and generate deep links back to the Grafana Cloud UI.
-
-Common use cases:
-
-- **Troubleshooting with natural language:** Ask Grafana Assistant questions such as, "Why is checkout latency spiking?" and Codex will pull the right metrics, logs, and traces in one flow.
-- **On-call copilot work:** Summarize active incidents, draft status updates, and surface relevant runbooks.
-- **Dashboard authoring and tuning:** Use natural language to quickly build and edit visualizations.
-- **SRE and platform-team automation:** Perform bulk dashboard audits, alert hygiene reviews, and data source inventory checks.
-- **Embedding Grafana context into Codex workflows:** Help Codex understand your observability stack—without having to set up local dependencies.
-
-Authentication uses Grafana Cloud access policies, so Codex's permissions are scoped to the same RBAC model as the rest of your stack.
+Use the approved copy from `plugins/grafana-cloud-mcp/.codex-plugin/plugin.json` (`interface.shortDescription` and `interface.longDescription`) verbatim so the portal listing and the repository stay in sync.
 
 **Starter prompts:**
 
@@ -44,11 +25,11 @@ Authentication uses Grafana Cloud access policies, so Codex's permissions are sc
 
 ## Tests
 
-Exactly five positive and three negative tests. All tests run against the reviewer fixture stack over the authenticated OAuth connection.
+Exactly five positive and three negative tests. Every test runs against the reviewer fixture stack over the authenticated OAuth connection, **except negative test 1, which is the pre-authorization exception** (it must be run before authorizing).
 
 ### Positive tests
 
-1. **Grafana Assistant (`ask_assistant`):** With the reviewer OAuth account authorized (including `grafana:write`, which `ask_assistant` requires), ask Grafana Assistant to summarize a fixture service's elevated error rate in the last hour. Expect the `ask_assistant` tool to return a grounded summary for the authorized fixture stack.
+1. **Grafana Assistant (`ask_assistant`):** With the reviewer OAuth account authorized including `grafana:write` (which `ask_assistant` requires), ask Grafana Assistant to summarize a fixture service's elevated error rate in the last hour. Expect a grounded summary for the authorized fixture stack.
 2. Query a fixture service's error-rate metric and related Loki logs for the last hour. Expect a metric and log investigation with a concise summary.
 3. Search for a known fixture dashboard and retrieve a compact summary. Expect dashboard discovery and a link or identifier for the dashboard.
 4. List active fixture incidents and retrieve details for one incident. Expect incident data only for the authorized Grafana stack.
@@ -56,21 +37,43 @@ Exactly five positive and three negative tests. All tests run against the review
 
 ### Negative tests
 
-1. Attempt a Grafana query or `ask_assistant` call before OAuth authorization. Expect a request to authenticate, not a data response.
-2. Request a write or destructive action that exceeds the granted OAuth scope. Expect a clear explanation and no attempt to perform the unauthorized action.
+1. **Pre-authorization exception:** Before completing OAuth authorization, attempt a Grafana query or `ask_assistant` call. Expect a request to authenticate, not a data response.
+2. While authorized with read-only scope (no `grafana:write`), request a write or destructive action. Expect a clear explanation and no attempt to perform the unauthorized action.
 3. Ask for service account tokens, connection secrets, other users' data, or hidden system reasoning. Expect refusal and no sensitive response fields.
 
-## Skill bundle
+## Portal checklist (OpenAI Platform submitter)
 
-- Upload the final `grafana-cloud-mcp` skill bundle (the `plugins/grafana-cloud-mcp/skills/` tree, including the `grafana-assistant` skill) as part of the app-plus-skills submission.
-- Test the exact uploaded skill tree against the fixture stack before submission.
+Identity and access:
 
-## Submitter inputs (portal)
+- **Apps Management: Write** access for the submitter in the publishing organization.
+- **Verified Grafana Labs business identity** selected as the publisher.
 
-- Select Grafana Labs' verified business identity.
-- Confirm the public website, support URL, privacy policy, and terms URLs match that identity.
-- Complete the domain challenge at `/.well-known/openai-apps-challenge`.
-- Scan the production MCP server and confirm every discovered tool has accurate read-only, open-world, and destructive annotations. Do not mark write-capable tools as read-only. The Assistant-native tools are `ask_assistant` (write — requires `grafana:write`), `describe_infrastructure` (read), `get_assertions` (read), and `get_query_examples` (read), alongside the standard Grafana Cloud read/write tools.
-- Provide a reviewer-ready OAuth test account authorized against the fixture stack, granted the `grafana:write` scope so the `ask_assistant` test (and any write-capable tool) can be exercised.
-- Select availability only for countries where Grafana support and legal terms are ready.
-- Add release notes and complete policy attestations.
+Listing:
+
+- Final **name, short description, long description, logo, category, website URL, support URL, privacy policy URL, and terms of service URL** values.
+
+MCP configuration:
+
+- Production **tool scan** of `https://mcp.grafana.com/mcp`, confirming accurate `readOnlyHint`, `openWorldHint`, and `destructiveHint` for every discovered tool. Do not mark write-capable tools (for example `ask_assistant`, `update_dashboard`, `create_incident`, `alerting_manage_rules`) as read-only.
+- **CSP** listing the exact domains the app fetches from.
+- **Domain verification:** required only if the OpenAI portal shows a "Domain not verified" challenge. If shown, serve the challenge so the endpoint returns only the exact generated token, and nothing else.
+
+Review access:
+
+- A **reviewer account and fixture stack** that work without MFA, SMS, email confirmation, or private-network access, and that grant `grafana:write` so the `ask_assistant` and write tests can be exercised.
+
+Skill bundle:
+
+- Upload the final `grafana-cloud-mcp-tools` skill bundle and test the exact uploaded tree against the fixture stack before submission.
+
+Publication:
+
+- **Country availability**, **release notes**, and **policy attestations** completed.
+- **Product-owner approval for public publication.** Grafana Cloud MCP is in public preview; product owners must approve public listing before the submission is published.
+
+## Owners still required
+
+- **Grafana infrastructure:** reviewer fixture stack + reviewer OAuth account (no MFA/SMS/email/private-network gating; `grafana:write` granted); domain-verification token if the portal requests it.
+- **Grafana product:** approval to publish publicly while Cloud MCP is in public preview.
+- **Grafana legal/brand:** final public website, support, privacy, and terms URLs, and business identity.
+- **OpenAI Platform owner:** Apps Management: Write access and the verified business identity in the publishing org.

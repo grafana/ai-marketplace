@@ -15,16 +15,29 @@ jobs:
 
       - name: Validate JSON syntax
         run: |
-          echo "Validating Claude Code marketplace.json..."
-          jq empty .claude-plugin/marketplace.json
-
-          echo "Validating Cursor marketplace.json..."
-          jq empty .cursor-plugin/marketplace.json
+          echo "Validating marketplace manifests (all formats)..."
+          for marketplace in \
+            .cursor-plugin/marketplace.json \
+            .claude-plugin/marketplace.json \
+            .grok-plugin/marketplace.json \
+            .kiro-power/marketplace.json \
+            .agents/plugins/marketplace.json; do
+            if [ -f "$marketplace" ]; then
+              echo "  Checking $marketplace"
+              jq empty "$marketplace"
+            fi
+          done
 
           echo "Validating plugin manifests..."
           for manifest in $(find plugins -name "plugin.json"); do
             echo "  Checking $manifest"
             jq empty "$manifest"
+          done
+
+          echo "Validating MCP configs..."
+          for mcp in $(find plugins \( -name "mcp.json" -o -name ".mcp.json" \)); do
+            echo "  Checking $mcp"
+            jq empty "$mcp"
           done
 
       - name: Setup Node.js
