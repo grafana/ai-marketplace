@@ -15,6 +15,8 @@ Two ways to connect Grafana, depending on the plugin:
 2. Install the `grafana-cloud-mcp` plugin from your platform's marketplace.
 3. When prompted, enter your Grafana Cloud URL and authorize the connection in your browser. Choose read-only or read + write access during consent.
 
+Authorizing **read + write** access additionally requires the **Assistant Admin** role or the `grafana-assistant-app.cloud-mcp.scope:write` permission. If **Write** is unavailable on the OAuth consent page, ask your Grafana organization administrator to grant it.
+
 No Docker, environment variables, or service-account token are required.
 
 ### Local Grafana MCP (Docker + service-account token)
