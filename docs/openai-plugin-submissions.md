@@ -48,7 +48,7 @@ Exactly five positive and three negative tests. All tests run against the review
 
 ### Positive tests
 
-1. **Grafana Assistant (`ask_assistant`):** With the reviewer OAuth account authorized, ask Grafana Assistant to summarize a fixture service's elevated error rate in the last hour. Expect the `ask_assistant` tool to return a grounded summary for the authorized fixture stack.
+1. **Grafana Assistant (`ask_assistant`):** With the reviewer OAuth account authorized (including `grafana:write`, which `ask_assistant` requires), ask Grafana Assistant to summarize a fixture service's elevated error rate in the last hour. Expect the `ask_assistant` tool to return a grounded summary for the authorized fixture stack.
 2. Query a fixture service's error-rate metric and related Loki logs for the last hour. Expect a metric and log investigation with a concise summary.
 3. Search for a known fixture dashboard and retrieve a compact summary. Expect dashboard discovery and a link or identifier for the dashboard.
 4. List active fixture incidents and retrieve details for one incident. Expect incident data only for the authorized Grafana stack.
@@ -70,7 +70,7 @@ Exactly five positive and three negative tests. All tests run against the review
 - Select Grafana Labs' verified business identity.
 - Confirm the public website, support URL, privacy policy, and terms URLs match that identity.
 - Complete the domain challenge at `/.well-known/openai-apps-challenge`.
-- Scan the production MCP server and confirm every discovered tool — including `ask_assistant` — has accurate read-only, open-world, and destructive annotations. Do not mark write-capable tools as read-only.
-- Provide a reviewer-ready OAuth test account authorized against the fixture stack.
+- Scan the production MCP server and confirm every discovered tool has accurate read-only, open-world, and destructive annotations. Do not mark write-capable tools as read-only. The Assistant-native tools are `ask_assistant` (write — requires `grafana:write`), `describe_infrastructure` (read), `get_assertions` (read), and `get_query_examples` (read), alongside the standard Grafana Cloud read/write tools.
+- Provide a reviewer-ready OAuth test account authorized against the fixture stack, granted the `grafana:write` scope so the `ask_assistant` test (and any write-capable tool) can be exercised.
 - Select availability only for countries where Grafana support and legal terms are ready.
 - Add release notes and complete policy attestations.

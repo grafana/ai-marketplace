@@ -19,9 +19,13 @@ Trigger when the user wants to:
 ## How to run an investigation
 
 1. Use the authenticated `grafana-cloud` MCP connection. If the user is not yet authorized, prompt them to complete the Grafana Cloud OAuth flow — never request, store, or pass credentials or service-account tokens yourself.
-2. For open-ended, natural-language Assistant questions ("Why is checkout latency spiking?", "Summarize the current incident"), prefer the `ask_assistant` tool when it is present in the connection's tool list.
-3. For targeted lookups (a specific PromQL/LogQL/TraceQL query, a named dashboard, a specific alert or incident), call the corresponding Grafana Cloud MCP tool directly.
-4. Ground every answer in tool results. State the evidence examined, the finding, remaining uncertainty, and the next useful diagnostic step. Link back to Grafana where the tool returns a deep link.
+2. For open-ended, natural-language Assistant questions ("Why is checkout latency spiking?", "Summarize the current incident"), prefer the `ask_assistant` tool when it is present in the connection's tool list. Note that `ask_assistant` is a write-scoped tool (it requires `grafana:write`); if the user has only granted read access, fall back to read tools and tell them so.
+3. Reach for the other Assistant-native tools when they fit the question:
+   - `describe_infrastructure` (read) — pre-built summaries of service groups: topology, metrics, and dependencies.
+   - `get_assertions` (read) — assertion summary for an entity.
+   - `get_query_examples` (read) — example queries for a datasource type.
+4. For targeted lookups (a specific PromQL/LogQL/TraceQL query, a named dashboard, a specific alert or incident), call the corresponding Grafana Cloud MCP tool directly.
+5. Ground every answer in tool results. State the evidence examined, the finding, remaining uncertainty, and the next useful diagnostic step. Link back to Grafana where the tool returns a deep link.
 
 ## Tool behavior and permissions
 
