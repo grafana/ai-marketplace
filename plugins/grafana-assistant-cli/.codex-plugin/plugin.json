@@ -1,0 +1,40 @@
+{
+  "name": "grafana-assistant-cli",
+  "version": "0.1.0",
+  "description": "Read-only Grafana Assistant investigations through the Grafana Assistant CLI.",
+  "author": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com",
+    "url": "https://grafana.com/"
+  },
+  "homepage": "https://github.com/grafana/assistant-cli",
+  "repository": "https://github.com/grafana/ai-marketplace",
+  "license": "Apache-2.0",
+  "keywords": [
+    "grafana",
+    "assistant",
+    "observability",
+    "cli",
+    "a2a"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Grafana Assistant",
+    "shortDescription": "Investigate Grafana data with the Grafana Assistant CLI.",
+    "longDescription": "Use an installed and authenticated Grafana Assistant CLI for read-only observability investigations across your authorized Grafana instance.",
+    "developerName": "Grafana Labs",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/grafana/assistant-cli",
+    "privacyPolicyURL": "https://grafana.com/legal/privacy-policy/",
+    "termsOfServiceURL": "https://grafana.com/legal/terms/",
+    "defaultPrompt": [
+      "Investigate elevated error rates in my Grafana instance.",
+      "Compare latency before and after the latest deployment.",
+      "Summarize the current incident and its related signals."
+    ],
+    "brandColor": "#F05A28"
+  }
+}

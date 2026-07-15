@@ -1,0 +1,43 @@
+{
+  "name": "grafana-cloud-mcp",
+  "version": "0.2.0",
+  "description": "Hosted MCP server for investigating and managing Grafana Cloud observability data.",
+  "author": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com",
+    "url": "https://grafana.com/"
+  },
+  "homepage": "https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/",
+  "repository": "https://github.com/grafana/ai-marketplace",
+  "license": "Apache-2.0",
+  "keywords": [
+    "grafana",
+    "mcp",
+    "cloud",
+    "observability",
+    "dashboards",
+    "prometheus",
+    "loki"
+  ],
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Grafana Cloud MCP",
+    "shortDescription": "Investigate Grafana Cloud metrics, logs, traces, and incidents.",
+    "longDescription": "Connect Grafana Cloud to investigate observability data, dashboards, alerts, incidents, and related resources with your existing Grafana permissions.",
+    "developerName": "Grafana Labs",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/",
+    "privacyPolicyURL": "https://grafana.com/legal/privacy-policy/",
+    "termsOfServiceURL": "https://grafana.com/legal/terms/",
+    "defaultPrompt": [
+      "Investigate errors from the latest deployment.",
+      "Find the dashboard behind this service's latency spike.",
+      "Summarize active incidents and related alerts."
+    ],
+    "brandColor": "#F05A28"
+  }
+}
