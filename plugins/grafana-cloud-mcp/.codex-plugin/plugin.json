@@ -1,0 +1,46 @@
+{
+  "name": "grafana-cloud-mcp",
+  "version": "0.2.0",
+  "description": "Connect Codex to your Grafana Cloud stack to query metrics, logs, traces, and profiles, investigate incidents, act on dashboards and alerts, and ask Grafana Assistant—all through a single hosted MCP endpoint with no self-hosting required.",
+  "author": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com",
+    "url": "https://grafana.com/"
+  },
+  "homepage": "https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/",
+  "repository": "https://github.com/grafana/ai-marketplace",
+  "license": "Apache-2.0",
+  "keywords": [
+    "grafana",
+    "mcp",
+    "cloud",
+    "observability",
+    "dashboards",
+    "prometheus",
+    "loki"
+  ],
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Grafana Cloud MCP",
+    "logo": "./assets/logo.svg",
+    "shortDescription": "Investigate and act on Grafana Cloud observability data, and ask Grafana Assistant—through one hosted MCP endpoint.",
+    "longDescription": "The Grafana Cloud hosted MCP server gives Codex secure, authenticated access to your full observability stack — and to Grafana Assistant — via the Model Context Protocol. It exposes Grafana Cloud's core APIs and Assistant capabilities as tools Codex can call directly, eliminating the need to run or maintain a local MCP server.\n\nCapabilities:\n- Grafana Assistant: Ask Grafana Assistant natural-language questions through the hosted MCP `ask_assistant` capability to investigate data, summarize incidents, and explain signals.\n- Metrics, logs, traces, profiles: Query Prometheus/Mimir, Loki, Tempo, and Pyroscope data sources with native PromQL, LogQL, and TraceQL.\n- Dashboards & data sources: List, search, read, and update dashboards; inspect data source configuration and health.\n- Alerting: List and inspect alert rules with full configuration and state; create, update, and delete alert rules; list notification contact points.\n- Incident response: Create and update incidents in Grafana Cloud IRM, view on-call schedules, and pull on-call context.\n- Admin & navigation: Search across your Grafana Cloud instance, retrieve team and folder structure, and generate deep links back to the Grafana Cloud UI.\n\nCommon use cases:\n- Troubleshooting with natural language: Ask Grafana Assistant questions such as, \"Why is checkout latency spiking?\" and Codex will pull the right metrics, logs, and traces in one flow.\n- On-call copilot work: Summarize active incidents, draft status updates, and surface relevant runbooks.\n- Dashboard authoring and tuning: Use natural language to quickly build and edit visualizations.\n- SRE and platform-team automation: Perform bulk dashboard audits, alert hygiene reviews, and data source inventory checks.\n- Embedding Grafana context into Codex workflows: Help Codex understand your observability stack—without having to set up local dependencies.\n\nAuthentication uses OAuth 2.1; access is user-scoped and limited by your Grafana RBAC.",
+    "developerName": "Grafana Labs",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/",
+    "privacyPolicyURL": "https://grafana.com/legal/privacy-policy/",
+    "termsOfServiceURL": "https://grafana.com/legal/terms/",
+    "defaultPrompt": [
+      "Ask Grafana Assistant why checkout latency is spiking right now.",
+      "Investigate errors from the latest deployment.",
+      "Find the dashboard behind this service's latency spike.",
+      "Summarize active incidents and related alerts."
+    ],
+    "brandColor": "#F05A28"
+  }
+}

@@ -1,6 +1,6 @@
 ---
 name: grafana-cloud-mcp-tools
-description: Connect to and use the Grafana Cloud MCP server effectively. Covers setup, OAuth authorization, tool categories, read/write access scopes, and best practices for context window management. Use when the user wants to set up Grafana Cloud MCP, needs guidance on which tool to use, or wants to understand access scopes.
+description: Connect to and use the Grafana Cloud MCP server effectively, including natural-language Grafana Assistant questions and observability investigations. Covers setup, OAuth authorization, tool categories, read/write access scopes, and best practices for context window management. Use when the user wants to set up Grafana Cloud MCP, ask Grafana Assistant a question, investigate metrics, logs, traces, profiles, dashboards, alerts, or incidents, needs guidance on which tool to use, or wants to understand access scopes.
 ---
 
 # Grafana Cloud MCP Server
@@ -146,6 +146,12 @@ If you have Tempo data sources, the Cloud MCP server proxies tools from the Temp
 
 ## Best practices
 
+### Grafana Assistant questions
+
+- For open-ended, natural-language requests ("Why is checkout latency spiking?", "Summarize the current incident", "Explain this alert"), use `ask_assistant` to let Grafana Assistant plan the investigation and return a grounded reply. `ask_assistant` is write-scoped and requires `grafana:write`.
+- If write access was not granted during OAuth authorization, `ask_assistant` is unavailable. Fall back to the appropriate read-only tools (for example `describe_infrastructure`, `get_assertions`, `query_prometheus`, `query_loki_logs`, `list_incidents`) and tell the user that the natural-language Assistant tool needs write scope. Re-authorizing only grants write if the user has the **Assistant Admin** role or the `grafana-assistant-app.cloud-mcp.scope:write` permission; otherwise a Grafana organization administrator must grant it first.
+- For specific, targeted lookups (a known query, dashboard, alert, or incident), call the corresponding tool directly rather than routing through `ask_assistant`.
+
 ### Context window management
 
 - Use `get_dashboard_summary` instead of `get_dashboard_by_uid` to avoid consuming context with full dashboard JSON.
@@ -167,5 +173,5 @@ If you have Tempo data sources, the Cloud MCP server proxies tools from the Temp
 ### Access and permissions
 
 - Access is user-scoped: the agent has only the permissions your Grafana RBAC grants you.
-- **Editor** role or higher is required to use the Cloud MCP server.
-- Write tools require the `grafana:write` scope, granted during OAuth consent.
+- Using the Cloud MCP server requires the **Assistant Cloud MCP User** role or the `grafana-assistant-app.cloud-mcp:access` permission. Editor and higher have this by default; other roles can be granted it explicitly.
+- Write tools require the `grafana:write` OAuth scope, granted during OAuth consent. Granting that scope is itself gated by Grafana RBAC: the user needs the **Assistant Admin** role or the `grafana-assistant-app.cloud-mcp.scope:write` permission to authorize a write-scoped connection. Read-only access does not require it.

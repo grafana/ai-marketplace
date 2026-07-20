@@ -1,6 +1,6 @@
 # Add a plugin
 
-Add a new plugin under `plugins/` and register it in all three marketplace manifests (Cursor, Claude Code, and Kiro).
+Add a new plugin under `plugins/` and register it in all applicable marketplace formats (Cursor, Claude Code, Kiro, Grok Build, and Codex). A plugin only needs manifests for the platforms it targets.
 
 ## 1. Create plugin directory
 
@@ -35,6 +35,42 @@ Both manifests use the same schema. Example:
 ```
 
 Keep the two `plugin.json` files identical — the validation script will flag version mismatches.
+
+### Codex manifest
+
+For Codex, add a `.codex-plugin/plugin.json`:
+
+```text
+plugins/my-new-plugin/.codex-plugin/plugin.json
+```
+
+It uses the base plugin fields plus an `interface` block for the public listing, and may declare `mcpServers` and/or `skills`:
+
+```json
+{
+  "name": "my-new-plugin",
+  "version": "0.1.0",
+  "description": "Describe what this plugin does",
+  "author": { "name": "Your Org" },
+  "license": "Apache-2.0",
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "My New Plugin",
+    "logo": "./assets/logo.svg",
+    "shortDescription": "One line for the listing",
+    "longDescription": "Full listing description",
+    "developerName": "Your Org",
+    "category": "Productivity",
+    "capabilities": ["Interactive"],
+    "websiteURL": "https://example.com",
+    "privacyPolicyURL": "https://example.com/privacy",
+    "termsOfServiceURL": "https://example.com/terms"
+  }
+}
+```
+
+For a hosted (Streamable HTTP) MCP server, point `mcpServers` at a `.mcp.json` with an `http` server entry rather than a local Docker command.
 
 ### Kiro Power manifest
 
@@ -89,9 +125,17 @@ Kiro-specific additions:
 - `POWER.md` — required for Kiro (replaces `plugin.json` as the manifest)
 - `steering/*.md` — optional workflow-specific guidance files referenced from `POWER.md`
 
-## 3. Register in all three marketplace manifests
+## 3. Register in the applicable marketplace formats
 
-Edit `.cursor-plugin/marketplace.json`, `.claude-plugin/marketplace.json`, **and** `.kiro-power/marketplace.json`, appending a new entry to each:
+Append a new entry to each marketplace manifest for the platforms your plugin targets:
+
+- `.cursor-plugin/marketplace.json` (Cursor)
+- `.claude-plugin/marketplace.json` (Claude Code)
+- `.kiro-power/marketplace.json` (Kiro)
+- `.grok-plugin/marketplace.json` (Grok Build)
+- `.agents/plugins/marketplace.json` (Codex)
+
+For Cursor, Claude Code, and Kiro:
 
 ```json
 {
@@ -101,7 +145,18 @@ Edit `.cursor-plugin/marketplace.json`, `.claude-plugin/marketplace.json`, **and
 }
 ```
 
-Use `plugins/my-new-plugin` as the source in the Cursor and Kiro manifests, and `./plugins/my-new-plugin` in the Claude Code manifest (with leading `./`).
+Use `plugins/my-new-plugin` as the source in the Cursor and Kiro manifests, and `./plugins/my-new-plugin` in the Claude Code manifest (with leading `./`). Grok uses its own entry shape (`source.type` / `source.path`, plus `category`, `keywords`, and `domains`).
+
+For Codex, register the plugin in `.agents/plugins/marketplace.json`:
+
+```json
+{
+  "name": "my-new-plugin",
+  "source": { "source": "local", "path": "./plugins/my-new-plugin" },
+  "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+  "category": "Productivity"
+}
+```
 
 ## 4. Validate
 
@@ -109,7 +164,7 @@ Use `plugins/my-new-plugin` as the source in the Cursor and Kiro manifests, and 
 node scripts/validate-template.mjs
 ```
 
-The script validates all three formats and checks cross-format consistency. Fix all reported errors before committing.
+The script validates the Cursor, Claude Code, Kiro, and Codex formats and checks cross-format consistency. For Codex it parses `.agents/plugins/marketplace.json`, checks each entry's required `policy`/`category` fields and safe relative `source.path`, and validates the referenced `.codex-plugin/plugin.json`, its declared `.mcp.json`, and any `skills/*/SKILL.md` frontmatter. Fix all reported errors before committing.
 
 ## 5. Test in Claude Code
 
@@ -144,4 +199,4 @@ If it was already installed, reinstall to pick up local changes:
 - Missing frontmatter keys (`name`, `description`) in skills, agents, or commands.
 - Rule files missing frontmatter `description`.
 - Broken relative paths for `logo`, `hooks`, or `mcpServers` in manifest files.
-- Forgetting to update one of the three marketplace manifests.
+- Forgetting to update one of the applicable marketplace manifests.
