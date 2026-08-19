@@ -1,19 +1,8 @@
 {
   "mcpServers": {
     "grafana": {
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-i",
-        "-e",
-        "GRAFANA_URL",
-        "-e",
-        "GRAFANA_SERVICE_ACCOUNT_TOKEN",
-        "grafana/mcp-grafana",
-        "-t",
-        "stdio"
-      ],
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/mcp-grafana-launcher.mjs", "-t", "stdio"],
       "env": {
         "GRAFANA_URL": "${user_config.grafana_url}",
         "GRAFANA_SERVICE_ACCOUNT_TOKEN": "${user_config.grafana_service_account_token}"

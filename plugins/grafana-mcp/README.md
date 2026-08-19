@@ -6,7 +6,14 @@ Cursor plugin that exposes the official [Grafana MCP server](https://github.com/
 
 ## Prerequisites
 
-1. [Docker](https://docs.docker.com/get-docker/) must be installed and running.
+1. A runtime for the MCP server, depending on your platform:
+
+   | Platform | Requirement |
+   |---|---|
+   | Claude Code, Claude Desktop | [Node.js](https://nodejs.org/) 18 or later |
+   | Cursor, Kiro, Codex, Grok | [Docker](https://docs.docker.com/get-docker/), installed and running |
+
+   On Claude, the plugin runs the official `mcp-grafana` release binary directly: `scripts/mcp-grafana-launcher.mjs` detects your OS *and* CPU architecture, downloads the matching build from [GitHub releases](https://github.com/grafana/mcp-grafana/releases), verifies its SHA-256 checksum against the published manifest, and caches it under `~/.cache/grafana-mcp/bin/<version>` (`%LOCALAPPDATA%\grafana-mcp` on Windows). Everything else runs the `grafana/mcp-grafana` Docker image in stdio mode.
 
 2. Create a [service account](https://grafana.com/docs/grafana/latest/administration/service-accounts/) in Grafana with at least **Viewer** role (or **Editor** for write operations). Generate a token.
 
@@ -19,7 +26,16 @@ When you enable the plugin, Claude Code prompts you for:
 - **Grafana instance URL** — e.g. `http://localhost:3000` for local, or `https://<stack>.grafana.net` for Grafana Cloud
 - **Service account token** — stored in your system keychain
 
-No shell environment variables required.
+No shell environment variables required. The launcher installs the server binary on first use, so the first start is slower than later ones.
+
+Two environment variables override its behaviour when you need them:
+
+- `MCP_GRAFANA_VERSION` — install a specific release tag (e.g. `v1.1.0`) instead of the latest
+- `MCP_GRAFANA_BINARY` — run an existing binary at this path and skip the download entirely
+
+#### Why a launcher instead of a bundled binary
+
+MCPB manifests can vary the server command by operating system but not by CPU architecture ([modelcontextprotocol/mcpb#10](https://github.com/modelcontextprotocol/mcpb/issues/10), open since June 2025). A bundle that names a single macOS binary therefore fails on any Mac whose architecture it does not match — Intel users get `Bad CPU type in executable` ([grafana/mcp-grafana#1070](https://github.com/grafana/mcp-grafana/issues/1070)). Detecting the architecture at launch time is the workaround that upstream issue settled on, and it keeps every platform on one plugin version.
 
 ### Cursor
 

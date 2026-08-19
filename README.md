@@ -5,7 +5,7 @@ Plugin marketplace for AI-assisted Grafana observability workflows in **Cursor**
 Two ways to connect Grafana, depending on the plugin:
 
 - **Hosted Grafana Cloud MCP** (`grafana-cloud-mcp`) — the hosted `https://mcp.grafana.com/mcp` server over Streamable HTTP with OAuth 2.1. No local Docker and no service-account token.
-- **Local Grafana MCP** (`grafana-mcp`) — the official [`grafana/mcp-grafana`](https://github.com/grafana/mcp-grafana) Docker image in stdio mode, using a Grafana service-account token.
+- **Local Grafana MCP** (`grafana-mcp`) — the official [`grafana/mcp-grafana`](https://github.com/grafana/mcp-grafana) server in stdio mode, using a Grafana service-account token. On Claude it runs the release binary for your OS and CPU architecture (needs Node.js 18+); elsewhere it runs the Docker image.
 
 ## Getting started
 
@@ -19,9 +19,9 @@ Authorizing **read + write** access additionally requires the **Assistant Admin*
 
 No Docker, environment variables, or service-account token are required.
 
-### Local Grafana MCP (Docker + service-account token)
+### Local Grafana MCP (service-account token)
 
-1. [Docker](https://docs.docker.com/get-docker/) must be installed and running.
+1. Install the runtime for your platform: Node.js 18+ on Claude Code and Claude Desktop, or [Docker](https://docs.docker.com/get-docker/) (installed and running) on Cursor, Kiro, Codex, and Grok. See [`plugins/grafana-mcp/README.md`](plugins/grafana-mcp/README.md#prerequisites) for why the two differ.
 2. Create a [service account](https://grafana.com/docs/grafana/latest/administration/service-accounts/) in Grafana with at least **Viewer** role (or **Editor** for write operations) and generate a token.
 3. Set environment variables:
 
@@ -53,7 +53,7 @@ Cursor, Kiro, and Grok Build install from their respective marketplace UIs.
 ## What's included
 
 - **`grafana-cloud-mcp`** — hosted Grafana Cloud MCP server (OAuth 2.1), plus the `grafana-cloud-mcp-tools` skill covering 60+ tools for dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, annotations, and Grafana Assistant (`ask_assistant`). Packaged for Codex as an app-plus-skills plugin.
-- **`grafana-mcp`** — local `grafana/mcp-grafana` Docker MCP server (stdio) for self-hosted or token-based setups.
+- **`grafana-mcp`** — local `grafana/mcp-grafana` MCP server (stdio) for self-hosted or token-based setups: native release binary on Claude, Docker image elsewhere.
 - **`grafana-assistant`** — skills and rules for developing and using the Grafana Assistant app and CLI (Cursor/Claude/Kiro/Grok).
 
 See each plugin's `README.md` for its full tool reference.
