@@ -17,10 +17,10 @@ The Grafana Cloud connector and the `grafana-cloud-mcp` plugin are not alternati
 ### Grafana Cloud in Claude apps (connector)
 
 1. Have a Grafana Cloud account with the **Assistant Cloud MCP User** role or the `grafana-assistant-app.cloud-mcp:access` permission (Editor and higher have it by default).
-2. In Claude, open **Settings → Connectors**, choose **Add custom connector**, and enter `https://mcp.grafana.com/mcp`.
+2. Add the connector:
+   - **Free, Pro, or Max:** go to [**Customize → Connectors**](https://claude.ai/customize/connectors), choose **Add custom connector**, and enter `https://mcp.grafana.com/mcp`.
+   - **Team or Enterprise:** an Owner adds it once for the organization under [**Organization settings → Connectors**](https://claude.ai/admin-settings/connectors) (**Add → Custom → Web**, URL `https://mcp.grafana.com/mcp`). Members can't add custom connectors themselves; it then appears for them under **Customize → Connectors** with a **Custom** label.
 3. Select **Connect**, enter your Grafana Cloud URL, and authorize in your browser. Choose read-only or read + write access during consent.
-
-**Claude organization Owners** can add the connector once for the whole organization, so members only need to sign in.
 
 ### Grafana Cloud in coding agents (plugin)
 
