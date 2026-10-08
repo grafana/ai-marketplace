@@ -2,24 +2,39 @@
 
 Plugin marketplace for AI-assisted Grafana observability workflows in **Cursor**, **Claude Code**, **Kiro**, **Grok Build**, and **Codex**.
 
-Two ways to connect Grafana, depending on the plugin:
+## Which one do I need?
 
-- **Hosted Grafana Cloud MCP** (`grafana-cloud-mcp`) — the hosted `https://mcp.grafana.com/mcp` server over Streamable HTTP with OAuth 2.1. No local Docker and no service-account token.
-- **Local Grafana MCP** (`grafana-mcp`) — the official [`grafana/mcp-grafana`](https://github.com/grafana/mcp-grafana) Docker image in stdio mode, using a Grafana service-account token.
+| You use | Install |
+| --- | --- |
+| **Grafana Cloud** with claude.ai, Claude Desktop, mobile, or Cowork | The **Grafana Cloud connector** |
+| **Grafana Cloud** with Claude Code, Cursor, Kiro, Grok Build, or Codex | The **`grafana-cloud-mcp`** plugin |
+| **Self-hosted Grafana** (or you need a service-account token) | The **`grafana-mcp`** plugin |
+
+The Grafana Cloud connector and the `grafana-cloud-mcp` plugin are not alternatives — they use the **same** hosted server (`https://mcp.grafana.com/mcp`) and the same sign-in. The plugin adds skills that teach the agent how to use the tools well. Install the plugin as well as the connector if your app supports plugins; you'll see one set of tools, not two.
 
 ## Getting started
 
-### Hosted Grafana Cloud MCP (OAuth, no local setup)
+### Grafana Cloud in Claude apps (connector)
 
 1. Have a Grafana Cloud account with the **Assistant Cloud MCP User** role or the `grafana-assistant-app.cloud-mcp:access` permission (Editor and higher have it by default).
-2. Install the `grafana-cloud-mcp` plugin from your platform's marketplace.
+2. Add the connector:
+   - **Free, Pro, or Max:** go to [**Customize → Connectors**](https://claude.ai/customize/connectors), choose **Add custom connector**, and enter `https://mcp.grafana.com/mcp`.
+   - **Team or Enterprise:** an Owner adds it once for the organization under [**Organization settings → Connectors**](https://claude.ai/admin-settings/connectors) (**Add → Custom → Web**, URL `https://mcp.grafana.com/mcp`). Members can't add custom connectors themselves; it then appears for them under **Customize → Connectors** with a **Custom** label.
+3. Select **Connect**, enter your Grafana Cloud URL, and authorize in your browser. Choose read-only or read + write access during consent.
+
+### Grafana Cloud in coding agents (plugin)
+
+1. Meet the same Grafana Cloud role requirement as above.
+2. Install the `grafana-cloud-mcp` plugin from your platform's marketplace (see [Add this marketplace](#add-this-marketplace)).
 3. When prompted, enter your Grafana Cloud URL and authorize the connection in your browser. Choose read-only or read + write access during consent.
 
-Authorizing **read + write** access additionally requires the **Assistant Admin** role or the `grafana-assistant-app.cloud-mcp.scope:write` permission. If **Write** is unavailable on the OAuth consent page, ask your Grafana organization administrator to grant it.
+Authorizing **read + write** access, through either the connector or the plugin, additionally requires the **Assistant Admin** role or the `grafana-assistant-app.cloud-mcp.scope:write` permission. If **Write** is unavailable on the OAuth consent page, ask your Grafana organization administrator to grant it.
 
 No Docker, environment variables, or service-account token are required.
 
-### Local Grafana MCP (Docker + service-account token)
+### Self-hosted Grafana (`grafana-mcp`, Docker + service-account token)
+
+Use this only for self-hosted Grafana or when you specifically need token-based access. Grafana Cloud users should use the connector or `grafana-cloud-mcp` above.
 
 1. [Docker](https://docs.docker.com/get-docker/) must be installed and running.
 2. Create a [service account](https://grafana.com/docs/grafana/latest/administration/service-accounts/) in Grafana with at least **Viewer** role (or **Editor** for write operations) and generate a token.
@@ -30,7 +45,6 @@ No Docker, environment variables, or service-account token are required.
    export GRAFANA_SERVICE_ACCOUNT_TOKEN="<your token>"
    ```
 
-   For Grafana Cloud, use your instance URL instead (e.g. `https://myinstance.grafana.net`).
 4. Install the `grafana-mcp` plugin from your platform's marketplace.
 
 ### Add this marketplace
@@ -53,7 +67,7 @@ Cursor, Kiro, and Grok Build install from their respective marketplace UIs.
 ## What's included
 
 - **`grafana-cloud-mcp`** — hosted Grafana Cloud MCP server (OAuth 2.1), plus the `grafana-cloud-mcp-tools` skill covering 60+ tools for dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, annotations, and Grafana Assistant (`ask_assistant`). Packaged for Codex as an app-plus-skills plugin.
-- **`grafana-mcp`** — local `grafana/mcp-grafana` Docker MCP server (stdio) for self-hosted or token-based setups.
+- **`grafana-mcp`** — local `grafana/mcp-grafana` Docker MCP server (stdio) for self-hosted Grafana or token-based setups.
 - **`grafana-assistant`** — skills and rules for developing and using the Grafana Assistant app and CLI (Cursor/Claude/Kiro/Grok).
 
 See each plugin's `README.md` for its full tool reference.

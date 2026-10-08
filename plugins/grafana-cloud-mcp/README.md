@@ -2,7 +2,9 @@
 
 Plugin that connects AI agents to the hosted [Grafana Cloud MCP server](https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/) for AI-assisted observability workflows.
 
-Unlike the local [grafana-mcp](../grafana-mcp/) plugin which runs via Docker, the Cloud MCP server is fully hosted and uses OAuth 2.1 authorization — no local installation or service account tokens required.
+The Cloud MCP server is fully hosted and uses OAuth 2.1 authorization — no local installation or service account tokens required.
+
+**Using claude.ai, Claude Desktop, mobile, or Cowork?** Add the Grafana Cloud connector (`https://mcp.grafana.com/mcp`) under [**Customize → Connectors**](https://claude.ai/customize/connectors) (on Team or Enterprise, an Owner adds it under [**Organization settings → Connectors**](https://claude.ai/admin-settings/connectors)). This plugin uses the same server and sign-in, and adds the `grafana-cloud-mcp-tools` skill — install it as well as the connector where plugins are supported, and you'll see one set of tools, not two.
 
 ## Prerequisites
 
