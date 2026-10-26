@@ -10,16 +10,13 @@ Create a new folder:
 plugins/my-new-plugin/
 ```
 
-### Cursor + Claude Code manifests
+### Source manifest (`plugin.src.json`)
 
-Add the required manifests for both formats:
+The Cursor, Claude Code, and Codex manifests and the MCP configs are generated. Don't edit them by hand; write one source file instead:
 
 ```text
-plugins/my-new-plugin/.cursor-plugin/plugin.json
-plugins/my-new-plugin/.claude-plugin/plugin.json
+plugins/my-new-plugin/plugin.src.json
 ```
-
-Both manifests use the same schema. Example:
 
 ```json
 {
@@ -27,50 +24,32 @@ Both manifests use the same schema. Example:
   "displayName": "My New Plugin",
   "version": "0.1.0",
   "description": "Describe what this plugin does",
-  "author": {
-    "name": "Your Org"
-  },
-  "logo": "assets/logo.svg"
-}
-```
-
-Keep the two `plugin.json` files identical — the validation script will flag version mismatches.
-
-### Codex manifest
-
-For Codex, add a `.codex-plugin/plugin.json`:
-
-```text
-plugins/my-new-plugin/.codex-plugin/plugin.json
-```
-
-It uses the base plugin fields plus an `interface` block for the public listing, and may declare `mcpServers` and/or `skills`:
-
-```json
-{
-  "name": "my-new-plugin",
-  "version": "0.1.0",
-  "description": "Describe what this plugin does",
   "author": { "name": "Your Org" },
   "license": "Apache-2.0",
-  "mcpServers": "./.mcp.json",
-  "skills": "./skills/",
-  "interface": {
-    "displayName": "My New Plugin",
-    "logo": "./assets/logo.svg",
-    "shortDescription": "One line for the listing",
-    "longDescription": "Full listing description",
-    "developerName": "Your Org",
-    "category": "Productivity",
-    "capabilities": ["Interactive"],
-    "websiteURL": "https://example.com",
-    "privacyPolicyURL": "https://example.com/privacy",
-    "termsOfServiceURL": "https://example.com/terms"
+  "keywords": ["grafana"],
+  "logo": "assets/logo.svg",
+  "mcpServers": {
+    "my-server": { "url": "https://example.com/mcp" }
+  },
+  "platforms": {
+    "claude": {},
+    "cursor": {}
   }
 }
 ```
 
-For a hosted (Streamable HTTP) MCP server, point `mcpServers` at a `.mcp.json` with an `http` server entry rather than a local Docker command.
+- Shared fields (`name`, `displayName`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`) go into every generated manifest. `name` must match the directory.
+- `platforms` lists the platforms to generate for. Each value is merged over the shared fields for that platform only; set a field to `null` to leave it out. Supported keys: `claude` (`.claude-plugin/plugin.json`), `cursor` (`.cursor-plugin/plugin.json`, plus `logo`), and `codex` (`.codex-plugin/plugin.json`; its `interface` gets `displayName` and `logo` filled in).
+- `mcpServers` is written as-is to `mcp.json` and, with `"type": "http"` added to remote servers, to `.mcp.json`. Use `url` for a hosted (Streamable HTTP) server, or `command`/`args`/`env` for a local one.
+- `userConfig` (optional) is Claude Code's install-time prompt, with an extra `env` field per option naming the environment variable it stands for. `${GRAFANA_URL}` in a server's `env` becomes `${user_config.grafana_url}` in `.mcp.json`.
+
+Then generate:
+
+```bash
+node scripts/generate.mjs
+```
+
+For Codex, put the listing fields under `platforms.codex`. They usually include `mcpServers: "./.mcp.json"`, `skills: "./skills/"`, and an `interface` block (`shortDescription`, `longDescription`, `developerName`, `category`, `capabilities`, `websiteURL`, `privacyPolicyURL`, `termsOfServiceURL`, `defaultPrompt`, `brandColor`). See `plugins/grafana-cloud-mcp/plugin.src.json`.
 
 ### Kiro Power manifest
 
@@ -117,7 +96,7 @@ Add only the components you need. These are shared across all formats:
 - `agents/*.md` (YAML frontmatter required)
 - `commands/*.(md|mdc|markdown|txt)` (frontmatter recommended)
 - `hooks/hooks.json` and `scripts/*` for automation hooks
-- `mcp.json` for MCP server definitions
+- MCP server definitions go in `plugin.src.json` (generated into `mcp.json` and `.mcp.json`)
 - `assets/logo.svg` for marketplace display
 
 Kiro-specific additions:
@@ -161,8 +140,11 @@ For Codex, register the plugin in `.agents/plugins/marketplace.json`:
 ## 4. Validate
 
 ```bash
+node scripts/generate.mjs --check
 node scripts/validate-template.mjs
 ```
+
+`--check` fails if a generated file doesn't match its `plugin.src.json`; CI runs it too.
 
 The script validates the Cursor, Claude Code, Kiro, and Codex formats and checks cross-format consistency. For Codex it parses `.agents/plugins/marketplace.json`, checks each entry's required `policy`/`category` fields and safe relative `source.path`, and validates the referenced `.codex-plugin/plugin.json`, its declared `.mcp.json`, and any `skills/*/SKILL.md` frontmatter. Fix all reported errors before committing.
 
@@ -192,9 +174,9 @@ If it was already installed, reinstall to pick up local changes:
 
 - Plugin `name` not kebab-case.
 - `source` path in marketplace manifest does not match folder name.
-- Missing `.cursor-plugin/plugin.json` or `.claude-plugin/plugin.json` in plugin folder.
+- Editing a generated manifest or MCP config instead of `plugin.src.json`.
 - Missing `POWER.md` in plugin folder (required for Kiro).
-- Version mismatch between the two `plugin.json` files.
+- Forgetting to run `node scripts/generate.mjs` after editing `plugin.src.json`.
 - `name` in `POWER.md` frontmatter does not match the marketplace entry name.
 - Missing frontmatter keys (`name`, `description`) in skills, agents, or commands.
 - Rule files missing frontmatter `description`.

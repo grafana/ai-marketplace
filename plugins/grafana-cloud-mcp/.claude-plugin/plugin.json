@@ -10,5 +10,13 @@
   "homepage": "https://github.com/grafana/ai-marketplace/tree/main/plugins/grafana-cloud-mcp",
   "repository": "https://github.com/grafana/ai-marketplace",
   "license": "Apache-2.0",
-  "keywords": ["grafana", "mcp", "cloud", "observability", "dashboards", "prometheus", "loki"]
+  "keywords": [
+    "grafana",
+    "mcp",
+    "cloud",
+    "observability",
+    "dashboards",
+    "prometheus",
+    "loki"
+  ]
 }

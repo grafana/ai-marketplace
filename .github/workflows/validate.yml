@@ -48,37 +48,8 @@ jobs:
       - name: Run validation script
         run: node scripts/validate-template.mjs
 
-      - name: Validate dual-format consistency
-        run: |
-          echo "Checking version consistency between Cursor and Claude Code formats..."
-
-          CURSOR_MKT_VER=$(jq -r '.metadata.version' .cursor-plugin/marketplace.json)
-          CLAUDE_MKT_VER=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
-
-          if [ "$CURSOR_MKT_VER" != "$CLAUDE_MKT_VER" ]; then
-            echo "ERROR: Marketplace versions don't match (Cursor: $CURSOR_MKT_VER, Claude: $CLAUDE_MKT_VER)"
-            exit 1
-          fi
-
-          echo "Marketplace versions match: $CURSOR_MKT_VER"
-
-          for plugin_dir in plugins/*; do
-            if [ -d "$plugin_dir" ]; then
-              plugin_name=$(basename "$plugin_dir")
-
-              if [ -f "$plugin_dir/.claude-plugin/plugin.json" ] && [ -f "$plugin_dir/.cursor-plugin/plugin.json" ]; then
-                CLAUDE_VER=$(jq -r '.version' "$plugin_dir/.claude-plugin/plugin.json")
-                CURSOR_VER=$(jq -r '.version' "$plugin_dir/.cursor-plugin/plugin.json")
-
-                if [ "$CLAUDE_VER" != "$CURSOR_VER" ]; then
-                  echo "ERROR: Plugin '$plugin_name' versions don't match (Cursor: $CURSOR_VER, Claude: $CLAUDE_VER)"
-                  exit 1
-                fi
-
-                echo "Plugin '$plugin_name' versions match: $CLAUDE_VER"
-              fi
-            fi
-          done
+      - name: Check generated manifests are up to date
+        run: node scripts/generate.mjs --check
 
       - name: Summary
         run: |

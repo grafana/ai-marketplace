@@ -388,38 +388,6 @@ function validateDualFormatConsistency(cursorMarketplace, claudeMarketplace) {
   }
 }
 
-async function validatePluginVersionConsistency() {
-  const pluginsDir = path.join(repoRoot, "plugins");
-  if (!(await pathExists(pluginsDir))) {
-    return;
-  }
-
-  const entries = await fs.readdir(pluginsDir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-
-    const pluginDir = path.join(pluginsDir, entry.name);
-    const cursorManifestPath = path.join(pluginDir, ".cursor-plugin", "plugin.json");
-    const claudeManifestPath = path.join(pluginDir, ".claude-plugin", "plugin.json");
-
-    const hasCursor = await pathExists(cursorManifestPath);
-    const hasClaude = await pathExists(claudeManifestPath);
-
-    if (hasCursor && hasClaude) {
-      const cursorManifest = await readJsonFile(cursorManifestPath, `${entry.name} cursor plugin.json`);
-      const claudeManifest = await readJsonFile(claudeManifestPath, `${entry.name} claude plugin.json`);
-
-      if (cursorManifest && claudeManifest) {
-        if (cursorManifest.version !== claudeManifest.version) {
-          addError(
-            `Plugin "${entry.name}" versions don't match (cursor-plugin: ${cursorManifest.version}, claude-plugin: ${claudeManifest.version}).`
-          );
-        }
-      }
-    }
-  }
-}
-
 async function readPowerMdFrontmatter(filePath, context) {
   let content;
   try {
@@ -693,7 +661,6 @@ async function main() {
   }
 
   validateDualFormatConsistency(results["cursor-plugin"], results["claude-plugin"]);
-  await validatePluginVersionConsistency();
 
   const kiroMarketplace = await validateKiroFormat();
   validateTripleFormatConsistency(results["cursor-plugin"], results["claude-plugin"], kiroMarketplace);

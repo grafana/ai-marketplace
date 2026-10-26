@@ -74,17 +74,18 @@ See each plugin's `README.md` for its full tool reference.
 
 ## Architecture
 
-Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform, and platform manifests are not automatically identical — each format has its own manifest and, where needed, format-specific fields.
+Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, and Codex manifests and the MCP configs are generated from one `plugin.src.json` per plugin, which holds the shared fields plus any format-specific ones.
 
 ```text
 plugins/grafana-cloud-mcp/
-├── .cursor-plugin/plugin.json   # Cursor manifest
-├── .claude-plugin/plugin.json   # Claude Code manifest
+├── plugin.src.json              # Source for the generated files below
+├── .cursor-plugin/plugin.json   # Cursor manifest (generated)
+├── .claude-plugin/plugin.json   # Claude Code manifest (generated)
 ├── .grok-plugin/plugin.json     # Grok Build manifest (when targeted)
-├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata)
+├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata, generated)
 ├── POWER.md                     # Kiro manifest (frontmatter + onboarding)
-├── .mcp.json                    # Hosted MCP server config (Streamable HTTP)
-├── mcp.json                     # Shared MCP server config
+├── .mcp.json                    # Hosted MCP server config (Streamable HTTP, generated)
+├── mcp.json                     # Shared MCP server config (generated)
 ├── skills/                      # Shared skills (SKILL.md)
 ├── assets/logo.svg              # Marketplace/listing logo
 └── steering/                    # Kiro steering files
@@ -98,13 +99,14 @@ Root marketplace manifests:
 - `.kiro-power/marketplace.json` — Kiro Powers registry
 - `.agents/plugins/marketplace.json` — Codex marketplace
 
-Versions are kept in sync across the Cursor and Claude Code formats and validated in CI.
+CI checks that the generated files match their `plugin.src.json`.
 
 ## Development
 
-Validate the plugin structure across all formats:
+After editing a `plugin.src.json`, regenerate the manifests, then validate the plugin structure across all formats:
 
 ```bash
+node scripts/generate.mjs
 node scripts/validate-template.mjs
 ```
 
