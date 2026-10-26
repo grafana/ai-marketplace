@@ -16,7 +16,7 @@
     "a2a",
     "cli"
   ],
+  "logo": "assets/logo.svg",
   "rules": "rules",
-  "skills": "skills",
-  "logo": "assets/logo.svg"
+  "skills": "skills"
 }

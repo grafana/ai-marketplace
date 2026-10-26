@@ -45,11 +45,11 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Run validation script
-        run: node scripts/validate-template.mjs
-
       - name: Check generated manifests are up to date
         run: node scripts/generate.mjs --check
+
+      - name: Run validation script
+        run: node scripts/validate-template.mjs
 
       - name: Summary
         run: |

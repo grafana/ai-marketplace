@@ -11,6 +11,18 @@ import process from "node:process";
 const repoRoot = process.cwd();
 const check = process.argv.includes("--check");
 
+const PLATFORMS = ["claude", "cursor", "codex"];
+
+// Every path generatedFiles() can produce, so files a source no longer
+// declares can be found and removed.
+const GENERATED_PATHS = [
+  ".claude-plugin/plugin.json",
+  ".cursor-plugin/plugin.json",
+  ".codex-plugin/plugin.json",
+  ".mcp.json",
+  "mcp.json",
+];
+
 const BASE_FIELDS = [
   "name",
   "displayName",
@@ -76,6 +88,16 @@ function generatedFiles(source) {
   const base = pick(source, BASE_FIELDS);
   const files = {};
 
+  for (const platform of Object.keys(platforms)) {
+    if (!PLATFORMS.includes(platform)) {
+      throw new Error(`${source.name}: unknown platform "${platform}" (expected one of ${PLATFORMS.join(", ")}).`);
+    }
+  }
+  // .mcp.json uses Claude-only ${user_config.*} placeholders, which Codex can't fill.
+  if (platforms.codex && source.userConfig) {
+    throw new Error(`${source.name}: "userConfig" can't be combined with the codex platform.`);
+  }
+
   if (platforms.claude) {
     files[".claude-plugin/plugin.json"] = merge(
       base,
@@ -85,12 +107,15 @@ function generatedFiles(source) {
   }
 
   if (platforms.cursor) {
-    files[".cursor-plugin/plugin.json"] = merge(base, platforms.cursor, { logo: source.logo });
+    files[".cursor-plugin/plugin.json"] = merge(base, { logo: source.logo }, platforms.cursor);
   }
 
   if (platforms.codex) {
     files[".codex-plugin/plugin.json"] = merge(base, { displayName: null }, platforms.codex, {
-      interface: merge({ displayName: source.displayName, logo: `./${source.logo}` }, platforms.codex.interface),
+      interface: merge(
+        { displayName: source.displayName, logo: source.logo && `./${source.logo}` },
+        platforms.codex.interface
+      ),
     });
   }
 
@@ -122,7 +147,21 @@ async function main() {
       throw new Error(`${path.relative(repoRoot, sourcePath)}: "name" must match the directory name "${entry.name}".`);
     }
 
-    for (const [relativePath, content] of Object.entries(generatedFiles(source))) {
+    const files = generatedFiles(source);
+    for (const relativePath of GENERATED_PATHS.filter((generatedPath) => !(generatedPath in files))) {
+      const filePath = path.join(pluginDir, relativePath);
+      if (!(await fs.stat(filePath).catch(() => null))) continue;
+
+      const displayPath = path.relative(repoRoot, filePath);
+      if (check) {
+        stale.push(`${displayPath} (no longer generated)`);
+        continue;
+      }
+      await fs.rm(filePath);
+      console.log(`Removed ${displayPath}`);
+    }
+
+    for (const [relativePath, content] of Object.entries(files)) {
       const filePath = path.join(pluginDir, relativePath);
       const displayPath = path.relative(repoRoot, filePath);
       const expected = `${JSON.stringify(content, null, 2)}\n`;
