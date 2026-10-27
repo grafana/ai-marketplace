@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "grafana-cloud-mcp",
+  "version": "0.2.0",
+  "description": "Hosted MCP server for AI-assisted Grafana Cloud observability: dashboards, datasources, Prometheus, Loki, Tempo, alerting, incidents, OnCall, and more — no local installation required",
+  "author": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com"
+  },
+  "homepage": "https://github.com/grafana/ai-marketplace/tree/main/plugins/grafana-cloud-mcp",
+  "repository": "https://github.com/grafana/ai-marketplace",
+  "license": "Apache-2.0",
+  "keywords": [
+    "grafana",
+    "mcp",
+    "cloud",
+    "observability",
+    "dashboards",
+    "prometheus",
+    "loki",
+    "tempo",
+    "alerting",
+    "incidents",
+    "oncall",
+    "monitoring"
+  ]
+}

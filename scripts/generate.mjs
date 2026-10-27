@@ -2,7 +2,7 @@
 
 // Generates each plugin's per-platform manifests, MCP configs and POWER.md
 // frontmatter from its plugins/<name>/plugin.src.json, plus the "plugins" list
-// of every marketplace index. Run with --check to fail instead of writing when
+// of every self-hosted marketplace index. Run with --check to fail instead of writing when
 // a generated file is out of date (used in CI).
 
 import { promises as fs } from "node:fs";
@@ -36,10 +36,16 @@ const MARKETPLACES = {
     entry: (name) => ({ name, source: { source: "local", path: `./plugins/${name}` } }),
   },
 };
-const PLATFORMS = Object.keys(MARKETPLACES);
+// Antigravity only lists plugins from its curated marketplace, so it has no index here.
+const PLATFORMS = [...Object.keys(MARKETPLACES), "antigravity"];
 
 const POWER_FIELDS = ["name", "displayName", "description", "keywords"];
 
+// Agent Plugins (https://agent-plugins.org), the format Kiro's powers registry requires.
+const AGENT_PLUGINS_FIELDS = ["name", "version", "description", "author", "homepage", "repository", "license", "keywords"];
+const AGENT_PLUGINS_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json";
+const AGENT_PLUGINS_MCP_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json";
+const ANTIGRAVITY_SCHEMA = "https://antigravity.google/schemas/v1/plugin.json";
 
 // Every path generatedFiles() can produce, so files a source no longer
 // declares can be found and removed.
@@ -47,8 +53,11 @@ const GENERATED_PATHS = [
   ".claude-plugin/plugin.json",
   ".cursor-plugin/plugin.json",
   ".codex-plugin/plugin.json",
+  ".antigravity-plugin/plugin.json",
+  "plugin.json",
   ".mcp.json",
   "mcp.json",
+  "mcp_config.json",
 ];
 
 const BASE_FIELDS = [
@@ -141,9 +150,12 @@ function generatedFiles(source) {
       }
     }
   }
-  // .mcp.json uses Claude-only ${user_config.*} placeholders, which Codex can't fill.
-  if (platforms.codex && source.userConfig) {
-    throw new Error(`${source.name}: "userConfig" can't be combined with the codex platform.`);
+  // Codex reads .mcp.json, whose ${user_config.*} placeholders only Claude Code
+  // fills. Antigravity would need its own "variables" prompt, which isn't generated.
+  for (const platform of ["codex", "antigravity"]) {
+    if (platforms[platform] && source.userConfig) {
+      throw new Error(`${source.name}: "userConfig" can't be combined with the ${platform} platform.`);
+    }
   }
 
   if (platforms.claude) {
@@ -154,8 +166,13 @@ function generatedFiles(source) {
     );
   }
 
+  // Inline servers keep Cursor off mcp.json, which is in the Agent Plugins format.
   if (platforms.cursor) {
-    files[".cursor-plugin/plugin.json"] = merge(base, { logo: source.logo }, overrides(source, "cursor"));
+    files[".cursor-plugin/plugin.json"] = merge(
+      base,
+      { logo: source.logo, mcpServers: source.mcpServers },
+      overrides(source, "cursor")
+    );
   }
 
   if (platforms.codex) {
@@ -167,9 +184,36 @@ function generatedFiles(source) {
     });
   }
 
+  if (platforms.kiro) {
+    const kiro = merge(base, overrides(source, "kiro"));
+    files["plugin.json"] = { $schema: AGENT_PLUGINS_SCHEMA, ...pick(kiro, AGENT_PLUGINS_FIELDS) };
+  }
+
+  if (platforms.antigravity) {
+    files[".antigravity-plugin/plugin.json"] = merge(
+      { $schema: ANTIGRAVITY_SCHEMA },
+      base,
+      { logo: source.logo },
+      overrides(source, "antigravity")
+    );
+  }
+
   if (source.mcpServers) {
+    const servers = Object.entries(source.mcpServers);
     files[".mcp.json"] = { mcpServers: claudeMcpServers(source.mcpServers, source.userConfig) };
-    files["mcp.json"] = { mcpServers: source.mcpServers };
+    files["mcp.json"] = {
+      $schema: AGENT_PLUGINS_MCP_SCHEMA,
+      mcpServers: Object.fromEntries(
+        servers.map(([name, server]) => [name, { type: server.url ? "streamable-http" : "stdio", ...server }])
+      ),
+    };
+    if (platforms.antigravity) {
+      files["mcp_config.json"] = {
+        mcpServers: Object.fromEntries(
+          servers.map(([name, { url, ...server }]) => [name, url ? { serverUrl: url, ...server } : server])
+        ),
+      };
+    }
   }
 
   return files;
@@ -231,6 +275,9 @@ async function main() {
 
   for (const source of sources) {
     const pluginDir = path.join("plugins", source.name);
+    if (source.logo && (await readText(path.join(repoRoot, pluginDir, source.logo))) === null) {
+      throw new Error(`${source.name}: logo "${source.logo}" does not exist.`);
+    }
     const files = generatedFiles(source);
 
     for (const relativePath of new Set([...GENERATED_PATHS, ...Object.keys(files)])) {

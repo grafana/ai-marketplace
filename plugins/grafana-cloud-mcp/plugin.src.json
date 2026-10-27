@@ -96,6 +96,14 @@
           "grafana.net"
         ]
       }
+    },
+    "antigravity": {
+      "description": "Query Grafana Cloud metrics, logs, traces and profiles, manage dashboards, alerts and incidents, and ask Grafana Assistant through the hosted MCP server.",
+      "suggestedPrompts": [
+        "Ask Grafana Assistant why checkout latency is spiking right now",
+        "Investigate errors from the latest deployment",
+        "Summarize active incidents and related alerts"
+      ]
     }
   }
 }

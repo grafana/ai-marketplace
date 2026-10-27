@@ -42,13 +42,14 @@ plugins/my-new-plugin/plugin.src.json
 - Shared fields (`name`, `displayName`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`) go into every generated manifest. `name` must match the directory.
 - `platforms` lists the platforms to generate for; each one also gets an entry in that platform's marketplace index. Each value is merged over the shared fields for that platform's files only; set a field to `null` to leave it out. Supported keys:
   - `claude`: `.claude-plugin/plugin.json`
-  - `cursor`: `.cursor-plugin/plugin.json`, plus `logo`
+  - `cursor`: `.cursor-plugin/plugin.json`, plus `logo` and the MCP servers inline
   - `codex`: `.codex-plugin/plugin.json`; its `interface` gets `displayName` and `logo` filled in
-  - `kiro`: the frontmatter of `POWER.md` (`name`, `displayName`, `description`, `keywords`); the body below it stays hand-written
+  - `kiro`: `plugin.json` in the [Agent Plugins](https://agent-plugins.org) format, which Kiro's powers registry requires, and the frontmatter of `POWER.md` (`name`, `displayName`, `description`, `keywords`); the `POWER.md` body stays hand-written
+  - `antigravity`: `.antigravity-plugin/plugin.json` (add up to 3 `suggestedPrompts`, and a 120–160 character `description`) and `mcp_config.json`. Antigravity only lists plugins from its curated marketplace, so there is no index entry
   - `grok`: no per-plugin file, only the marketplace entry
 - `platforms.<platform>.marketplace` adds fields to that plugin's marketplace index entry, e.g. Codex's `policy` and `category`, or Grok's `category`, `homepage`, `keywords`, and `domains`. The entry's `description` is the platform's `description` (shared or overridden) unless `marketplace` sets one.
-- `mcpServers` is written as-is to `mcp.json` and, with `"type": "http"` added to remote servers, to `.mcp.json`. Use `url` for a hosted (Streamable HTTP) server, or `command`/`args`/`env` for a local one.
-- `userConfig` (optional) is Claude Code's install-time prompt, with an extra `env` field per option naming the environment variable it stands for. `${GRAFANA_URL}` in a server's `env` becomes `${user_config.grafana_url}` in `.mcp.json`.
+- `mcpServers` declares each server once, without a `type`: `url` for a hosted (Streamable HTTP) server, or `command`/`args`/`env` for a local one. The generator writes it in each platform's format: `"type": "http"` in `.mcp.json` (Claude Code, Codex), `"type": "streamable-http"` or `"stdio"` in the Agent Plugins `mcp.json` (Kiro), `serverUrl` in `mcp_config.json` (Antigravity), and inline in the Cursor manifest.
+- `userConfig` (optional) is Claude Code's install-time prompt, with an extra `env` field per option naming the environment variable it stands for. `${GRAFANA_URL}` in a server's `env` becomes `${user_config.grafana_url}` in `.mcp.json`. It can't be combined with `codex` or `antigravity`.
 
 Then generate:
 

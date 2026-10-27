@@ -19,5 +19,10 @@
     "prometheus",
     "loki"
   ],
-  "logo": "assets/logo.svg"
+  "logo": "assets/logo.svg",
+  "mcpServers": {
+    "grafana-cloud": {
+      "url": "https://mcp.grafana.com/mcp"
+    }
+  }
 }

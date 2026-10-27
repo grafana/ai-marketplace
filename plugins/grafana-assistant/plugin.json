@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "grafana-assistant",
+  "version": "0.2.0",
+  "description": "Skills and rules for developing and using the Grafana Assistant app and CLI — query metrics, logs, traces, and run AI-assisted observability investigations via the A2A API",
+  "author": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com"
+  },
+  "homepage": "https://github.com/grafana/ai-marketplace/tree/main/plugins/grafana-assistant",
+  "repository": "https://github.com/grafana/ai-marketplace",
+  "license": "Apache-2.0",
+  "keywords": [
+    "grafana",
+    "assistant",
+    "a2a",
+    "cli",
+    "observability",
+    "investigation",
+    "metrics",
+    "logs",
+    "traces"
+  ]
+}

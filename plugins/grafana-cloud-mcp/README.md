@@ -41,3 +41,8 @@ The Cloud MCP server provides 60+ tools across these categories:
 | Other         | ask_assistant, describe_infrastructure, get_assertions         |
 
 See the [Grafana Cloud MCP documentation](https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/) for the full tool reference.
+
+## Privacy and support
+
+- Privacy policy: <https://grafana.com/legal/privacy-policy/>
+- Support: <https://grafana.com/support/> or [open an issue](https://github.com/grafana/ai-marketplace/issues)

@@ -22,6 +22,8 @@ The Grafana Cloud connector and the `grafana-cloud-mcp` plugin are not alternati
    - **Team or Enterprise:** an Owner adds it once for the organization under [**Organization settings → Connectors**](https://claude.ai/admin-settings/connectors) (**Add → Custom → Web**, URL `https://mcp.grafana.com/mcp`). Members can't add custom connectors themselves; it then appears for them under **Customize → Connectors** with a **Custom** label.
 3. Select **Connect**, enter your Grafana Cloud URL, and authorize in your browser. Choose read-only or read + write access during consent.
 
+Grafana Cloud is also listed in the [Claude Connectors Directory](https://claude.com/marketplace/connectors/grafana-cloud), which you can add it from instead of entering the URL.
+
 ### Grafana Cloud in coding agents (plugin)
 
 1. Meet the same Grafana Cloud role requirement as above.
@@ -74,18 +76,21 @@ See each plugin's `README.md` for its full tool reference.
 
 ## Architecture
 
-Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, and Codex manifests, the MCP configs, the `POWER.md` frontmatter, and the marketplace indexes' `plugins` lists are generated from one `plugin.src.json` per plugin, which holds the shared fields plus any format-specific ones.
+Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, Codex, Antigravity, and Agent Plugins (Kiro) manifests, the MCP configs, the `POWER.md` frontmatter, and the marketplace indexes' `plugins` lists are generated from one `plugin.src.json` per plugin, which holds the shared fields plus any format-specific ones.
 
 ```text
 plugins/grafana-cloud-mcp/
 ├── plugin.src.json              # Source for the generated files below
-├── .cursor-plugin/plugin.json   # Cursor manifest (generated)
+├── .cursor-plugin/plugin.json   # Cursor manifest, with MCP servers inline (generated)
 ├── .claude-plugin/plugin.json   # Claude Code manifest (generated)
 ├── .grok-plugin/plugin.json     # Grok Build manifest (when targeted)
 ├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata, generated)
-├── POWER.md                     # Kiro manifest (generated frontmatter + hand-written onboarding)
+├── .antigravity-plugin/plugin.json # Antigravity manifest (generated)
+├── plugin.json                  # Agent Plugins manifest for Kiro's powers registry (generated)
+├── POWER.md                     # Legacy Kiro manifest (generated frontmatter + hand-written onboarding)
 ├── .mcp.json                    # Hosted MCP server config (Streamable HTTP, generated)
-├── mcp.json                     # Shared MCP server config (generated)
+├── mcp.json                     # Agent Plugins MCP config, read by Kiro (generated)
+├── mcp_config.json              # Antigravity MCP config (generated)
 ├── skills/                      # Shared skills (SKILL.md)
 ├── assets/logo.svg              # Marketplace/listing logo
 └── steering/                    # Kiro steering files
