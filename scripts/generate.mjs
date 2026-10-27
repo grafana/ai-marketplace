@@ -40,6 +40,7 @@ const PLATFORMS = Object.keys(MARKETPLACES);
 
 const POWER_FIELDS = ["name", "displayName", "description", "keywords"];
 
+
 // Every path generatedFiles() can produce, so files a source no longer
 // declares can be found and removed.
 const GENERATED_PATHS = [
@@ -61,6 +62,8 @@ const BASE_FIELDS = [
   "license",
   "keywords",
 ];
+
+const SOURCE_FIELDS = [...BASE_FIELDS, "logo", "mcpServers", "userConfig", "platforms"];
 
 function pick(source, keys) {
   return Object.fromEntries(keys.filter((key) => source[key] !== undefined).map((key) => [key, source[key]]));
@@ -110,8 +113,10 @@ function claudeMcpServers(servers, userConfig = {}) {
 }
 
 // A platform's overrides for its own files; "marketplace" only affects the index entry.
+// Its null values are kept so the final merge can remove the shared field.
 function overrides(source, platform) {
-  return merge(source.platforms[platform], { marketplace: null });
+  const { marketplace, ...rest } = source.platforms[platform] ?? {};
+  return rest;
 }
 
 // Returns { "<path relative to the plugin dir>": content } for every generated JSON file.
@@ -120,9 +125,20 @@ function generatedFiles(source) {
   const base = pick(source, BASE_FIELDS);
   const files = {};
 
-  for (const platform of Object.keys(platforms)) {
+  for (const field of Object.keys(source)) {
+    if (!SOURCE_FIELDS.includes(field)) {
+      throw new Error(`${source.name}: unknown field "${field}" (put platform-specific fields under "platforms").`);
+    }
+  }
+  for (const [platform, values] of Object.entries(platforms)) {
     if (!PLATFORMS.includes(platform)) {
       throw new Error(`${source.name}: unknown platform "${platform}" (expected one of ${PLATFORMS.join(", ")}).`);
+    }
+    // Every platform must ship the same plugin under the same version.
+    for (const field of ["name", "version"]) {
+      if (field in values) {
+        throw new Error(`${source.name}: platforms.${platform} can't override "${field}".`);
+      }
     }
   }
   // .mcp.json uses Claude-only ${user_config.*} placeholders, which Codex can't fill.
@@ -196,7 +212,15 @@ async function readSources(pluginsDir) {
   return sources.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-const readText = (filePath) => fs.readFile(filePath, "utf8").catch(() => null);
+// File contents, or null if it doesn't exist. Other read errors are thrown.
+async function readText(filePath) {
+  try {
+    return await fs.readFile(filePath, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
 const jsonText = (content) => `${JSON.stringify(content, null, 2)}\n`;
 
 async function main() {
@@ -209,7 +233,7 @@ async function main() {
     const pluginDir = path.join("plugins", source.name);
     const files = generatedFiles(source);
 
-    for (const relativePath of GENERATED_PATHS) {
+    for (const relativePath of new Set([...GENERATED_PATHS, ...Object.keys(files)])) {
       outputs.set(path.join(pluginDir, relativePath), relativePath in files ? jsonText(files[relativePath]) : null);
     }
 
