@@ -121,6 +121,26 @@ function claudeMcpServers(servers, userConfig = {}) {
   );
 }
 
+// Cursor only expands environment variables written as ${env:NAME}.
+function cursorMcpServers(servers) {
+  const rewrite = (value) =>
+    typeof value === "string" ? value.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, "${env:$1}") : value;
+  const rewriteValues = (object) =>
+    object && Object.fromEntries(Object.entries(object).map(([key, value]) => [key, rewrite(value)]));
+
+  return Object.fromEntries(
+    Object.entries(servers).map(([name, server]) => [
+      name,
+      merge(server, {
+        url: rewrite(server.url),
+        args: server.args?.map(rewrite),
+        env: rewriteValues(server.env),
+        headers: rewriteValues(server.headers),
+      }),
+    ])
+  );
+}
+
 // A platform's overrides for its own files; "marketplace" only affects the index entry.
 // Its null values are kept so the final merge can remove the shared field.
 function overrides(source, platform) {
@@ -143,10 +163,21 @@ function generatedFiles(source) {
     if (!PLATFORMS.includes(platform)) {
       throw new Error(`${source.name}: unknown platform "${platform}" (expected one of ${PLATFORMS.join(", ")}).`);
     }
+    if (values.marketplace && !MARKETPLACES[platform]) {
+      throw new Error(`${source.name}: platforms.${platform} has no marketplace index for "marketplace".`);
+    }
     // Every platform must ship the same plugin under the same version.
     for (const field of ["name", "version"]) {
       if (field in values) {
         throw new Error(`${source.name}: platforms.${platform} can't override "${field}".`);
+      }
+    }
+  }
+  // Servers are declared once; each output adds its own transport field.
+  for (const [name, server] of Object.entries(source.mcpServers ?? {})) {
+    for (const field of ["type", "serverUrl", "httpUrl"]) {
+      if (field in server) {
+        throw new Error(`${source.name}: mcpServers.${name} can't set "${field}"; use "url" or "command".`);
       }
     }
   }
@@ -170,7 +201,7 @@ function generatedFiles(source) {
   if (platforms.cursor) {
     files[".cursor-plugin/plugin.json"] = merge(
       base,
-      { logo: source.logo, mcpServers: source.mcpServers },
+      { logo: source.logo, mcpServers: source.mcpServers && cursorMcpServers(source.mcpServers) },
       overrides(source, "cursor")
     );
   }
@@ -190,6 +221,14 @@ function generatedFiles(source) {
   }
 
   if (platforms.antigravity) {
+    const antigravity = merge(base, overrides(source, "antigravity"));
+    // Antigravity's marketplace listing rules.
+    if (!(antigravity.description?.length >= 120 && antigravity.description.length <= 160)) {
+      throw new Error(`${source.name}: the Antigravity description must be 120–160 characters.`);
+    }
+    if ((antigravity.suggestedPrompts?.length ?? 0) > 3) {
+      throw new Error(`${source.name}: Antigravity allows at most 3 suggestedPrompts.`);
+    }
     files[".antigravity-plugin/plugin.json"] = merge(
       { $schema: ANTIGRAVITY_SCHEMA },
       base,
@@ -275,7 +314,7 @@ async function main() {
 
   for (const source of sources) {
     const pluginDir = path.join("plugins", source.name);
-    if (source.logo && (await readText(path.join(repoRoot, pluginDir, source.logo))) === null) {
+    if (source.logo && !(await fs.stat(path.join(repoRoot, pluginDir, source.logo)).catch(() => null))) {
       throw new Error(`${source.name}: logo "${source.logo}" does not exist.`);
     }
     const files = generatedFiles(source);

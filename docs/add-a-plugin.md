@@ -176,3 +176,4 @@ If it was already installed, reinstall to pick up local changes:
 - Rule files missing frontmatter `description`.
 - Broken relative paths for `logo`, `hooks`, or `mcpServers` in manifest files.
 - Editing a marketplace index's `plugins` list or `POWER.md` frontmatter by hand.
+- Hand-writing a file at a generated path (such as a root `plugin.json` or `mcp_config.json`) in a plugin that doesn't target that platform; the generator removes it.
