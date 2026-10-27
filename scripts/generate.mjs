@@ -2,7 +2,7 @@
 
 // Generates each plugin's per-platform manifests, MCP configs and POWER.md
 // frontmatter from its plugins/<name>/plugin.src.json, plus the "plugins" list
-// of every self-hosted marketplace index. Run with --check to fail instead of writing when
+// of every self-hosted marketplace index and a Kiro power under kiro/<name>/. Run with --check to fail instead of writing when
 // a generated file is out of date (used in CI).
 
 import { promises as fs } from "node:fs";
@@ -42,6 +42,9 @@ const PLATFORMS = [...Object.keys(MARKETPLACES), "antigravity"];
 const POWER_FIELDS = ["name", "displayName", "description", "keywords"];
 
 // Agent Plugins (https://agent-plugins.org), the format Kiro's powers registry requires.
+// It lives in its own folder so hosts that fall back to a root plugin.json
+// don't pick up its minimal manifest instead of their own.
+const KIRO_POWERS_DIR = "kiro";
 const AGENT_PLUGINS_FIELDS = ["name", "version", "description", "author", "homepage", "repository", "license", "keywords"];
 const AGENT_PLUGINS_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json";
 const AGENT_PLUGINS_MCP_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json";
@@ -54,7 +57,6 @@ const GENERATED_PATHS = [
   ".cursor-plugin/plugin.json",
   ".codex-plugin/plugin.json",
   ".antigravity-plugin/plugin.json",
-  "plugin.json",
   ".mcp.json",
   "mcp.json",
   "mcp_config.json",
@@ -101,9 +103,10 @@ function claudeUserConfig(userConfig) {
   return Object.fromEntries(Object.entries(userConfig).map(([key, { env, ...option }]) => [key, option]));
 }
 
-// Claude Code needs an explicit "http" type for remote servers, and fills
+// Servers with an explicit "http" type for remote ones, as Claude Code, Factory
+// and Kiro's POWER.md loader expect. Claude Code also fills
 // ${user_config.<key>} placeholders instead of reading environment variables.
-function claudeMcpServers(servers, userConfig = {}) {
+function typedMcpServers(servers, userConfig = {}) {
   const placeholders = Object.fromEntries(
     Object.entries(userConfig).map(([key, option]) => [`\${${option.env}}`, `\${user_config.${key}}`])
   );
@@ -215,11 +218,6 @@ function generatedFiles(source) {
     });
   }
 
-  if (platforms.kiro) {
-    const kiro = merge(base, overrides(source, "kiro"));
-    files["plugin.json"] = { $schema: AGENT_PLUGINS_SCHEMA, ...pick(kiro, AGENT_PLUGINS_FIELDS) };
-  }
-
   if (platforms.antigravity) {
     const antigravity = merge(base, overrides(source, "antigravity"));
     // Antigravity's marketplace listing rules.
@@ -239,13 +237,8 @@ function generatedFiles(source) {
 
   if (source.mcpServers) {
     const servers = Object.entries(source.mcpServers);
-    files[".mcp.json"] = { mcpServers: claudeMcpServers(source.mcpServers, source.userConfig) };
-    files["mcp.json"] = {
-      $schema: AGENT_PLUGINS_MCP_SCHEMA,
-      mcpServers: Object.fromEntries(
-        servers.map(([name, server]) => [name, { type: server.url ? "streamable-http" : "stdio", ...server }])
-      ),
-    };
+    files[".mcp.json"] = { mcpServers: typedMcpServers(source.mcpServers, source.userConfig) };
+    files["mcp.json"] = { mcpServers: typedMcpServers(source.mcpServers) };
     if (platforms.antigravity) {
       files["mcp_config.json"] = {
         mcpServers: Object.fromEntries(
@@ -256,6 +249,32 @@ function generatedFiles(source) {
   }
 
   return files;
+}
+
+// The Agent Plugins manifest and MCP config of a plugin's Kiro power.
+function kiroPowerFiles(source) {
+  const kiro = merge(pick(source, BASE_FIELDS), overrides(source, "kiro"));
+  const files = { "plugin.json": { $schema: AGENT_PLUGINS_SCHEMA, ...pick(kiro, AGENT_PLUGINS_FIELDS) } };
+  if (source.mcpServers) {
+    files["mcp.json"] = {
+      $schema: AGENT_PLUGINS_MCP_SCHEMA,
+      mcpServers: Object.fromEntries(
+        Object.entries(source.mcpServers).map(([name, server]) => [
+          name,
+          { type: server.url ? "streamable-http" : "stdio", ...server },
+        ])
+      ),
+    };
+  }
+  return files;
+}
+
+// Repo-relative paths of every file under dir, or [] if it doesn't exist.
+async function listFiles(dir) {
+  const entries = await fs.readdir(path.join(repoRoot, dir), { recursive: true, withFileTypes: true }).catch(() => []);
+  return entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => path.relative(repoRoot, path.join(entry.parentPath, entry.name)));
 }
 
 // POWER.md with its frontmatter regenerated and its hand-written body kept.
@@ -311,6 +330,7 @@ async function main() {
   const sources = await readSources(pluginsDir);
   // Repo-relative path -> expected content, or null for a file to remove.
   const outputs = new Map();
+  const kiroOutputs = new Map();
 
   for (const source of sources) {
     const pluginDir = path.join("plugins", source.name);
@@ -326,7 +346,29 @@ async function main() {
     if (source.platforms.kiro) {
       const powerPath = path.join(pluginDir, "POWER.md");
       outputs.set(powerPath, powerMd(source, await readText(path.join(repoRoot, powerPath)), powerPath));
+
+      // The power copies the plugin's README and skills, since registry imports
+      // only see the power's own folder.
+      // ponytail: copies are read as UTF-8 text; binary skill assets would need Buffers.
+      const powerDir = path.join(KIRO_POWERS_DIR, source.name);
+      for (const [relativePath, content] of Object.entries(kiroPowerFiles(source))) {
+        kiroOutputs.set(path.join(powerDir, relativePath), jsonText(content));
+      }
+      for (const file of [path.join(pluginDir, "README.md"), ...(await listFiles(path.join(pluginDir, "skills")))]) {
+        const content = await readText(path.join(repoRoot, file));
+        if (content !== null) {
+          kiroOutputs.set(path.join(powerDir, path.relative(pluginDir, file)), content);
+        }
+      }
     }
+  }
+
+  // Remove files under kiro/ that no power generates any more.
+  for (const file of await listFiles(KIRO_POWERS_DIR)) {
+    outputs.set(file, null);
+  }
+  for (const [file, content] of kiroOutputs) {
+    outputs.set(file, content);
   }
 
   for (const [platform, marketplace] of Object.entries(MARKETPLACES)) {

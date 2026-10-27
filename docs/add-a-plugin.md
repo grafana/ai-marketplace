@@ -44,11 +44,11 @@ plugins/my-new-plugin/plugin.src.json
   - `claude`: `.claude-plugin/plugin.json`
   - `cursor`: `.cursor-plugin/plugin.json`, plus `logo` and the MCP servers inline
   - `codex`: `.codex-plugin/plugin.json`; its `interface` gets `displayName` and `logo` filled in
-  - `kiro`: `plugin.json` in the [Agent Plugins](https://agent-plugins.org) format, which Kiro's powers registry requires, and the frontmatter of `POWER.md` (`name`, `displayName`, `description`, `keywords`); the `POWER.md` body stays hand-written
+  - `kiro`: the frontmatter of `POWER.md` (`name`, `displayName`, `description`, `keywords`), with the `POWER.md` body hand-written, plus a power under `kiro/<name>/` in the [Agent Plugins](https://agent-plugins.org) format, which Kiro's powers registry requires: `plugin.json`, `mcp.json`, and copies of the plugin's `README.md` and `skills/`
   - `antigravity`: `.antigravity-plugin/plugin.json` (add up to 3 `suggestedPrompts`, and a 120–160 character `description`) and `mcp_config.json`. Antigravity only lists plugins from its curated marketplace, so there is no index entry
   - `grok`: no per-plugin file, only the marketplace entry
 - `platforms.<platform>.marketplace` adds fields to that plugin's marketplace index entry, e.g. Codex's `policy` and `category`, or Grok's `category`, `homepage`, `keywords`, and `domains`. The entry's `description` is the platform's `description` (shared or overridden) unless `marketplace` sets one.
-- `mcpServers` declares each server once, without a `type`: `url` for a hosted (Streamable HTTP) server, or `command`/`args`/`env` for a local one. The generator writes it in each platform's format: `"type": "http"` in `.mcp.json` (Claude Code, Codex), `"type": "streamable-http"` or `"stdio"` in the Agent Plugins `mcp.json` (Kiro), `serverUrl` in `mcp_config.json` (Antigravity), and inline in the Cursor manifest.
+- `mcpServers` declares each server once, without a `type`: `url` for a hosted (Streamable HTTP) server, or `command`/`args`/`env` for a local one. The generator writes it in each platform's format: `"type": "http"` in `.mcp.json` (Claude Code, Codex), `"type": "http"` for remote servers in `mcp.json` (Kiro's `POWER.md` loader, Factory), `"type": "streamable-http"` or `"stdio"` in `kiro/<name>/mcp.json`, `serverUrl` in `mcp_config.json` (Antigravity), and inline in the Cursor manifest.
 - `userConfig` (optional) is Claude Code's install-time prompt, with an extra `env` field per option naming the environment variable it stands for. `${GRAFANA_URL}` in a server's `env` becomes `${user_config.grafana_url}` in `.mcp.json`. It can't be combined with `codex` or `antigravity`.
 
 Then generate:
@@ -176,4 +176,4 @@ If it was already installed, reinstall to pick up local changes:
 - Rule files missing frontmatter `description`.
 - Broken relative paths for `logo`, `hooks`, or `mcpServers` in manifest files.
 - Editing a marketplace index's `plugins` list or `POWER.md` frontmatter by hand.
-- Hand-writing a file at a generated path (such as a root `plugin.json` or `mcp_config.json`) in a plugin that doesn't target that platform; the generator removes it.
+- Hand-writing a file at a generated path (such as `mcp_config.json`) in a plugin that doesn't target that platform, or anywhere under `kiro/`; the generator removes it.

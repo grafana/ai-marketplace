@@ -86,14 +86,23 @@ plugins/grafana-cloud-mcp/
 ├── .grok-plugin/plugin.json     # Grok Build manifest (when targeted)
 ├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata, generated)
 ├── .antigravity-plugin/plugin.json # Antigravity manifest (generated)
-├── plugin.json                  # Agent Plugins manifest for Kiro's powers registry (generated)
 ├── POWER.md                     # Legacy Kiro manifest (generated frontmatter + hand-written onboarding)
 ├── .mcp.json                    # Hosted MCP server config (Streamable HTTP, generated)
-├── mcp.json                     # Agent Plugins MCP config, read by Kiro (generated)
+├── mcp.json                     # MCP config for Kiro's POWER.md loader and Factory (generated)
 ├── mcp_config.json              # Antigravity MCP config (generated)
 ├── skills/                      # Shared skills (SKILL.md)
 ├── assets/logo.svg              # Marketplace/listing logo
 └── steering/                    # Kiro steering files
+```
+
+Each plugin that targets Kiro also gets a generated power in the [Agent Plugins](https://agent-plugins.org) format, which Kiro's powers registry requires. It sits in its own folder so other hosts that fall back to a root `plugin.json` don't load it instead of their own manifest:
+
+```text
+kiro/grafana-cloud-mcp/
+├── plugin.json                  # Agent Plugins manifest
+├── mcp.json                     # Agent Plugins MCP config
+├── README.md                    # Copied from the plugin
+└── skills/                      # Copied from the plugin
 ```
 
 Root marketplace manifests:
