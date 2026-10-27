@@ -1,6 +1,6 @@
 # Add a plugin
 
-Add a new plugin under `plugins/` and register it in all applicable marketplace formats (Cursor, Claude Code, Kiro, Grok Build, and Codex). A plugin only needs manifests for the platforms it targets.
+Add a new plugin under `plugins/` with a `plugin.src.json` that lists the platforms it targets (Cursor, Claude Code, Kiro, Grok Build, and Codex). The generator writes its manifests and its entries in each platform's marketplace index.
 
 ## 1. Create plugin directory
 
@@ -12,7 +12,7 @@ plugins/my-new-plugin/
 
 ### Source manifest (`plugin.src.json`)
 
-The Cursor, Claude Code, and Codex manifests and the MCP configs are generated. Don't edit them by hand; write one source file instead:
+The Cursor, Claude Code, and Codex manifests, the MCP configs, the `POWER.md` frontmatter, and the `plugins` list of every marketplace index are generated. Don't edit them by hand; write one source file instead:
 
 ```text
 plugins/my-new-plugin/plugin.src.json
@@ -33,13 +33,20 @@ plugins/my-new-plugin/plugin.src.json
   },
   "platforms": {
     "claude": {},
-    "cursor": {}
+    "cursor": {},
+    "kiro": {}
   }
 }
 ```
 
 - Shared fields (`name`, `displayName`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`) go into every generated manifest. `name` must match the directory.
-- `platforms` lists the platforms to generate for. Each value is merged over the shared fields for that platform only; set a field to `null` to leave it out. Supported keys: `claude` (`.claude-plugin/plugin.json`), `cursor` (`.cursor-plugin/plugin.json`, plus `logo`), and `codex` (`.codex-plugin/plugin.json`; its `interface` gets `displayName` and `logo` filled in).
+- `platforms` lists the platforms to generate for; each one also gets an entry in that platform's marketplace index. Each value is merged over the shared fields for that platform's files only; set a field to `null` to leave it out. Supported keys:
+  - `claude`: `.claude-plugin/plugin.json`
+  - `cursor`: `.cursor-plugin/plugin.json`, plus `logo`
+  - `codex`: `.codex-plugin/plugin.json`; its `interface` gets `displayName` and `logo` filled in
+  - `kiro`: the frontmatter of `POWER.md` (`name`, `displayName`, `description`, `keywords`); the body below it stays hand-written
+  - `grok`: no per-plugin file, only the marketplace entry
+- `platforms.<platform>.marketplace` adds fields to that plugin's marketplace index entry, e.g. Codex's `policy` and `category`, or Grok's `category`, `homepage`, `keywords`, and `domains`. The entry's `description` is the platform's `description` (shared or overridden) unless `marketplace` sets one.
 - `mcpServers` is written as-is to `mcp.json` and, with `"type": "http"` added to remote servers, to `.mcp.json`. Use `url` for a hosted (Streamable HTTP) server, or `command`/`args`/`env` for a local one.
 - `userConfig` (optional) is Claude Code's install-time prompt, with an extra `env` field per option naming the environment variable it stands for. `${GRAFANA_URL}` in a server's `env` becomes `${user_config.grafana_url}` in `.mcp.json`.
 
@@ -53,7 +60,7 @@ For Codex, put the listing fields under `platforms.codex`. They usually include 
 
 ### Kiro Power manifest
 
-Add a `POWER.md` file with YAML frontmatter and onboarding/steering instructions:
+Add a `POWER.md` file with onboarding/steering instructions. Start it with an empty frontmatter block (`---` and `---` lines) and run the generator to fill it in from `plugin.src.json` and `platforms.kiro`:
 
 ```text
 plugins/my-new-plugin/POWER.md
@@ -104,9 +111,9 @@ Kiro-specific additions:
 - `POWER.md` — required for Kiro (replaces `plugin.json` as the manifest)
 - `steering/*.md` — optional workflow-specific guidance files referenced from `POWER.md`
 
-## 3. Register in the applicable marketplace formats
+## 3. Marketplace indexes
 
-Append a new entry to each marketplace manifest for the platforms your plugin targets:
+The `plugins` list in each marketplace index is generated from the `platforms` in every `plugin.src.json`, sorted by plugin name:
 
 - `.cursor-plugin/marketplace.json` (Cursor)
 - `.claude-plugin/marketplace.json` (Claude Code)
@@ -114,26 +121,14 @@ Append a new entry to each marketplace manifest for the platforms your plugin ta
 - `.grok-plugin/marketplace.json` (Grok Build)
 - `.agents/plugins/marketplace.json` (Codex)
 
-For Cursor, Claude Code, and Kiro:
+Only the top-level fields (`name`, `owner`, `metadata`, and so on) are hand-written. A Codex entry needs `policy` and `category` in `platforms.codex.marketplace`:
 
 ```json
-{
-  "name": "my-new-plugin",
-  "source": "plugins/my-new-plugin",
-  "description": "Describe your plugin"
-}
-```
-
-Use `plugins/my-new-plugin` as the source in the Cursor and Kiro manifests, and `./plugins/my-new-plugin` in the Claude Code manifest (with leading `./`). Grok uses its own entry shape (`source.type` / `source.path`, plus `category`, `keywords`, and `domains`).
-
-For Codex, register the plugin in `.agents/plugins/marketplace.json`:
-
-```json
-{
-  "name": "my-new-plugin",
-  "source": { "source": "local", "path": "./plugins/my-new-plugin" },
-  "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
-  "category": "Productivity"
+"codex": {
+  "marketplace": {
+    "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+    "category": "Productivity"
+  }
 }
 ```
 
@@ -173,12 +168,10 @@ If it was already installed, reinstall to pick up local changes:
 ## 6. Common pitfalls
 
 - Plugin `name` not kebab-case.
-- `source` path in marketplace manifest does not match folder name.
 - Editing a generated manifest or MCP config instead of `plugin.src.json`.
 - Missing `POWER.md` in plugin folder (required for Kiro).
 - Forgetting to run `node scripts/generate.mjs` after editing `plugin.src.json`.
-- `name` in `POWER.md` frontmatter does not match the marketplace entry name.
 - Missing frontmatter keys (`name`, `description`) in skills, agents, or commands.
 - Rule files missing frontmatter `description`.
 - Broken relative paths for `logo`, `hooks`, or `mcpServers` in manifest files.
-- Forgetting to update one of the applicable marketplace manifests.
+- Editing a marketplace index's `plugins` list or `POWER.md` frontmatter by hand.

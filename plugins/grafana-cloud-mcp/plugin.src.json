@@ -57,6 +57,44 @@
           "Summarize active incidents and related alerts."
         ],
         "brandColor": "#F05A28"
+      },
+      "marketplace": {
+        "policy": {
+          "installation": "AVAILABLE",
+          "authentication": "ON_INSTALL"
+        },
+        "category": "Productivity"
+      }
+    },
+    "kiro": {
+      "description": "Hosted MCP server for AI-assisted Grafana Cloud observability: dashboards, datasources, Prometheus, Loki, Tempo, alerting, incidents, OnCall, and more — no local installation required",
+      "keywords": [
+        "grafana",
+        "mcp",
+        "cloud",
+        "observability",
+        "dashboards",
+        "prometheus",
+        "loki",
+        "tempo",
+        "alerting",
+        "incidents",
+        "oncall",
+        "monitoring"
+      ]
+    },
+    "grok": {
+      "marketplace": {
+        "category": "monitoring",
+        "homepage": "https://grafana.com/products/cloud/",
+        "keywords": [
+          "grafana cloud",
+          "grafana cloud mcp"
+        ],
+        "domains": [
+          "grafana.com",
+          "grafana.net"
+        ]
       }
     }
   }

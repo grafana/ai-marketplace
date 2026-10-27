@@ -59,6 +59,36 @@
   },
   "platforms": {
     "claude": {},
-    "cursor": {}
+    "cursor": {},
+    "kiro": {
+      "description": "AI-assisted Grafana observability: dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more via the official MCP server",
+      "keywords": [
+        "grafana",
+        "mcp",
+        "observability",
+        "dashboards",
+        "prometheus",
+        "loki",
+        "alerting",
+        "incidents",
+        "oncall",
+        "monitoring"
+      ]
+    },
+    "grok": {
+      "marketplace": {
+        "description": "MCP server for AI-assisted Grafana observability — dashboards, datasources, Prometheus, Loki, alerting, incidents, and OnCall.",
+        "category": "monitoring",
+        "homepage": "https://github.com/grafana/mcp-grafana",
+        "keywords": [
+          "grafana",
+          "grafana mcp"
+        ],
+        "domains": [
+          "grafana.com",
+          "grafana.net"
+        ]
+      }
+    }
   }
 }

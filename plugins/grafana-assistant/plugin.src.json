@@ -22,6 +22,34 @@
     "cursor": {
       "rules": "rules",
       "skills": "skills"
+    },
+    "kiro": {
+      "description": "Skills and rules for developing and using the Grafana Assistant app and CLI — query metrics, logs, traces, and run AI-assisted observability investigations via the A2A API",
+      "keywords": [
+        "grafana",
+        "assistant",
+        "a2a",
+        "cli",
+        "observability",
+        "investigation",
+        "metrics",
+        "logs",
+        "traces"
+      ]
+    },
+    "grok": {
+      "marketplace": {
+        "category": "monitoring",
+        "homepage": "https://github.com/grafana/ai-marketplace",
+        "keywords": [
+          "grafana",
+          "grafana assistant"
+        ],
+        "domains": [
+          "grafana.com",
+          "grafana.net"
+        ]
+      }
     }
   }
 }

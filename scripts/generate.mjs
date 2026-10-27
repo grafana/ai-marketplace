@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-// Generates each plugin's per-platform manifests and MCP configs from its
-// plugins/<name>/plugin.src.json. Run with --check to fail instead of writing
-// when a generated file is out of date (used in CI).
+// Generates each plugin's per-platform manifests, MCP configs and POWER.md
+// frontmatter from its plugins/<name>/plugin.src.json, plus the "plugins" list
+// of every marketplace index. Run with --check to fail instead of writing when
+// a generated file is out of date (used in CI).
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
@@ -11,7 +12,33 @@ import process from "node:process";
 const repoRoot = process.cwd();
 const check = process.argv.includes("--check");
 
-const PLATFORMS = ["claude", "cursor", "codex"];
+// Each platform's marketplace index and how one plugin is listed in it. Only
+// the "plugins" list is generated; the rest of the file is hand-written.
+const MARKETPLACES = {
+  claude: {
+    path: ".claude-plugin/marketplace.json",
+    entry: (name, description) => ({ name, source: `./plugins/${name}`, description }),
+  },
+  cursor: {
+    path: ".cursor-plugin/marketplace.json",
+    entry: (name, description) => ({ name, source: name, description }),
+  },
+  kiro: {
+    path: ".kiro-power/marketplace.json",
+    entry: (name, description) => ({ name, source: `plugins/${name}`, description }),
+  },
+  grok: {
+    path: ".grok-plugin/marketplace.json",
+    entry: (name, description) => ({ name, description, source: { type: "local", path: `./plugins/${name}` } }),
+  },
+  codex: {
+    path: ".agents/plugins/marketplace.json",
+    entry: (name) => ({ name, source: { source: "local", path: `./plugins/${name}` } }),
+  },
+};
+const PLATFORMS = Object.keys(MARKETPLACES);
+
+const POWER_FIELDS = ["name", "displayName", "description", "keywords"];
 
 // Every path generatedFiles() can produce, so files a source no longer
 // declares can be found and removed.
@@ -82,7 +109,12 @@ function claudeMcpServers(servers, userConfig = {}) {
   );
 }
 
-// Returns { "<path relative to the plugin dir>": content } for every generated file.
+// A platform's overrides for its own files; "marketplace" only affects the index entry.
+function overrides(source, platform) {
+  return merge(source.platforms[platform], { marketplace: null });
+}
+
+// Returns { "<path relative to the plugin dir>": content } for every generated JSON file.
 function generatedFiles(source) {
   const platforms = source.platforms ?? {};
   const base = pick(source, BASE_FIELDS);
@@ -102,16 +134,16 @@ function generatedFiles(source) {
     files[".claude-plugin/plugin.json"] = merge(
       base,
       { userConfig: claudeUserConfig(source.userConfig) },
-      platforms.claude
+      overrides(source, "claude")
     );
   }
 
   if (platforms.cursor) {
-    files[".cursor-plugin/plugin.json"] = merge(base, { logo: source.logo }, platforms.cursor);
+    files[".cursor-plugin/plugin.json"] = merge(base, { logo: source.logo }, overrides(source, "cursor"));
   }
 
   if (platforms.codex) {
-    files[".codex-plugin/plugin.json"] = merge(base, { displayName: null }, platforms.codex, {
+    files[".codex-plugin/plugin.json"] = merge(base, { displayName: null }, overrides(source, "codex"), {
       interface: merge(
         { displayName: source.displayName, logo: source.logo && `./${source.logo}` },
         platforms.codex.interface
@@ -127,15 +159,27 @@ function generatedFiles(source) {
   return files;
 }
 
-async function main() {
-  const pluginsDir = path.join(repoRoot, "plugins");
-  const stale = [];
+// POWER.md with its frontmatter regenerated and its hand-written body kept.
+function powerMd(source, current, displayPath) {
+  const match = current?.match(/^---\n(?:[\s\S]*?\n)?---\n/);
+  if (!match) {
+    throw new Error(`${displayPath} must exist and start with a frontmatter block.`);
+  }
 
+  const fields = merge(pick(source, POWER_FIELDS), overrides(source, "kiro"));
+  const lines = POWER_FIELDS.filter((key) => fields[key] !== undefined).map((key) => {
+    const value = fields[key];
+    return `${key}: ${Array.isArray(value) ? `[${value.map((item) => JSON.stringify(item)).join(", ")}]` : JSON.stringify(value)}`;
+  });
+  return `---\n${lines.join("\n")}\n---\n${current.slice(match[0].length)}`;
+}
+
+async function readSources(pluginsDir) {
+  const sources = [];
   for (const entry of await fs.readdir(pluginsDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
 
-    const pluginDir = path.join(pluginsDir, entry.name);
-    const sourcePath = path.join(pluginDir, "plugin.src.json");
+    const sourcePath = path.join(pluginsDir, entry.name, "plugin.src.json");
     let source;
     try {
       source = JSON.parse(await fs.readFile(sourcePath, "utf8"));
@@ -146,36 +190,68 @@ async function main() {
     if (source.name !== entry.name) {
       throw new Error(`${path.relative(repoRoot, sourcePath)}: "name" must match the directory name "${entry.name}".`);
     }
+    source.platforms ??= {};
+    sources.push(source);
+  }
+  return sources.sort((a, b) => a.name.localeCompare(b.name));
+}
 
+const readText = (filePath) => fs.readFile(filePath, "utf8").catch(() => null);
+const jsonText = (content) => `${JSON.stringify(content, null, 2)}\n`;
+
+async function main() {
+  const pluginsDir = path.join(repoRoot, "plugins");
+  const sources = await readSources(pluginsDir);
+  // Repo-relative path -> expected content, or null for a file to remove.
+  const outputs = new Map();
+
+  for (const source of sources) {
+    const pluginDir = path.join("plugins", source.name);
     const files = generatedFiles(source);
-    for (const relativePath of GENERATED_PATHS.filter((generatedPath) => !(generatedPath in files))) {
-      const filePath = path.join(pluginDir, relativePath);
-      if (!(await fs.stat(filePath).catch(() => null))) continue;
 
-      const displayPath = path.relative(repoRoot, filePath);
-      if (check) {
-        stale.push(`${displayPath} (no longer generated)`);
-        continue;
-      }
+    for (const relativePath of GENERATED_PATHS) {
+      outputs.set(path.join(pluginDir, relativePath), relativePath in files ? jsonText(files[relativePath]) : null);
+    }
+
+    if (source.platforms.kiro) {
+      const powerPath = path.join(pluginDir, "POWER.md");
+      outputs.set(powerPath, powerMd(source, await readText(path.join(repoRoot, powerPath)), powerPath));
+    }
+  }
+
+  for (const [platform, marketplace] of Object.entries(MARKETPLACES)) {
+    const current = await readText(path.join(repoRoot, marketplace.path));
+    if (current === null) {
+      throw new Error(`${marketplace.path} is missing; create it with the marketplace's top-level fields.`);
+    }
+
+    const plugins = sources
+      .filter((source) => source.platforms[platform])
+      .map((source) => {
+        const description = source.platforms[platform].description ?? source.description;
+        return merge(marketplace.entry(source.name, description), source.platforms[platform].marketplace);
+      });
+    outputs.set(marketplace.path, jsonText({ ...JSON.parse(current), plugins }));
+  }
+
+  const stale = [];
+  for (const [displayPath, expected] of outputs) {
+    const filePath = path.join(repoRoot, displayPath);
+    const current = await readText(filePath);
+    if (current === expected) continue;
+
+    if (check) {
+      stale.push(expected === null ? `${displayPath} (no longer generated)` : displayPath);
+      continue;
+    }
+    if (expected === null) {
       await fs.rm(filePath);
       console.log(`Removed ${displayPath}`);
+      continue;
     }
-
-    for (const [relativePath, content] of Object.entries(files)) {
-      const filePath = path.join(pluginDir, relativePath);
-      const displayPath = path.relative(repoRoot, filePath);
-      const expected = `${JSON.stringify(content, null, 2)}\n`;
-      const current = await fs.readFile(filePath, "utf8").catch(() => null);
-      if (current === expected) continue;
-
-      if (check) {
-        stale.push(displayPath);
-        continue;
-      }
-      await fs.mkdir(path.dirname(filePath), { recursive: true });
-      await fs.writeFile(filePath, expected);
-      console.log(`Wrote ${displayPath}`);
-    }
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, expected);
+    console.log(`Wrote ${displayPath}`);
   }
 
   if (stale.length > 0) {

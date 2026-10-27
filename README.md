@@ -74,7 +74,7 @@ See each plugin's `README.md` for its full tool reference.
 
 ## Architecture
 
-Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, and Codex manifests and the MCP configs are generated from one `plugin.src.json` per plugin, which holds the shared fields plus any format-specific ones.
+Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, and Codex manifests, the MCP configs, the `POWER.md` frontmatter, and the marketplace indexes' `plugins` lists are generated from one `plugin.src.json` per plugin, which holds the shared fields plus any format-specific ones.
 
 ```text
 plugins/grafana-cloud-mcp/
@@ -83,7 +83,7 @@ plugins/grafana-cloud-mcp/
 ├── .claude-plugin/plugin.json   # Claude Code manifest (generated)
 ├── .grok-plugin/plugin.json     # Grok Build manifest (when targeted)
 ├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata, generated)
-├── POWER.md                     # Kiro manifest (frontmatter + onboarding)
+├── POWER.md                     # Kiro manifest (generated frontmatter + hand-written onboarding)
 ├── .mcp.json                    # Hosted MCP server config (Streamable HTTP, generated)
 ├── mcp.json                     # Shared MCP server config (generated)
 ├── skills/                      # Shared skills (SKILL.md)
@@ -110,4 +110,4 @@ node scripts/generate.mjs
 node scripts/validate-template.mjs
 ```
 
-To add a plugin, create a directory under `plugins/` and register it in the applicable marketplace manifests. See `docs/add-a-plugin.md` for details.
+To add a plugin, create a directory under `plugins/` with a `plugin.src.json` and run the generator; it registers the plugin in each targeted marketplace. See `docs/add-a-plugin.md` for details.
