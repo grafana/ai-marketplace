@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "grafana-mcp",
   "version": "0.2.0",
-  "description": "AI-assisted Grafana observability: dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more via the official MCP server",
+  "description": "For self-hosted Grafana OSS and Enterprise: runs the Grafana MCP server locally in Docker with a service-account token.",
   "author": {
     "name": "Grafana Labs",
     "email": "grafana-assistant@grafana.com"

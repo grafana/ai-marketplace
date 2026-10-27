@@ -1,8 +1,8 @@
 {
   "name": "grafana-mcp",
-  "displayName": "Grafana MCP",
+  "displayName": "Grafana (self-hosted)",
   "version": "0.2.0",
-  "description": "MCP server for AI-assisted Grafana dashboard, datasource, alerting, and incident management.",
+  "description": "For self-hosted Grafana OSS and Enterprise: runs the Grafana MCP server locally in Docker with a service-account token.",
   "author": {
     "name": "Grafana Labs",
     "email": "grafana-assistant@grafana.com"
@@ -61,7 +61,6 @@
     "claude": {},
     "cursor": {},
     "kiro": {
-      "description": "AI-assisted Grafana observability: dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more via the official MCP server",
       "keywords": [
         "grafana",
         "mcp",
@@ -77,7 +76,6 @@
     },
     "grok": {
       "marketplace": {
-        "description": "MCP server for AI-assisted Grafana observability — dashboards, datasources, Prometheus, Loki, alerting, incidents, and OnCall.",
         "category": "monitoring",
         "homepage": "https://github.com/grafana/mcp-grafana",
         "keywords": [

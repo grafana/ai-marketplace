@@ -7,8 +7,8 @@ Plugin marketplace for AI-assisted Grafana observability workflows in **Cursor**
 | You use | Install |
 | --- | --- |
 | **Grafana Cloud** with claude.ai, Claude Desktop, mobile, or Cowork | The **Grafana Cloud connector** |
-| **Grafana Cloud** with Claude Code, Cursor, Kiro, Grok Build, or Codex | The **`grafana-cloud-mcp`** plugin |
-| **Self-hosted Grafana** (or you need a service-account token) | The **`grafana-mcp`** plugin |
+| **Grafana Cloud** with Claude Code, Cursor, Kiro, Grok Build, or Codex | The **Grafana Cloud** plugin (`grafana-cloud-mcp`) |
+| **Self-hosted Grafana** (or you need a service-account token) | The **Grafana (self-hosted)** plugin (`grafana-mcp`) |
 
 The Grafana Cloud connector and the `grafana-cloud-mcp` plugin are not alternatives — they use the **same** hosted server (`https://mcp.grafana.com/mcp`) and the same sign-in. The plugin adds skills that teach the agent how to use the tools well. Install the plugin as well as the connector if your app supports plugins; you'll see one set of tools, not two.
 
@@ -68,9 +68,8 @@ Cursor, Kiro, and Grok Build install from their respective marketplace UIs.
 
 ## What's included
 
-- **`grafana-cloud-mcp`** — hosted Grafana Cloud MCP server (OAuth 2.1), plus the `grafana-cloud-mcp-tools` skill covering 60+ tools for dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, annotations, and Grafana Assistant (`ask_assistant`). Packaged for Codex as an app-plus-skills plugin.
-- **`grafana-mcp`** — local `grafana/mcp-grafana` Docker MCP server (stdio) for self-hosted Grafana or token-based setups.
-- **`grafana-assistant`** — skills and rules for developing and using the Grafana Assistant app and CLI (Cursor/Claude/Kiro/Grok).
+- **Grafana Cloud** (`grafana-cloud-mcp`) — hosted Grafana Cloud MCP server (OAuth 2.1), plus the `grafana-cloud-mcp-tools` skill covering 60+ tools for dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, annotations, and Grafana Assistant (`ask_assistant`). Packaged for Codex as an app-plus-skills plugin.
+- **Grafana (self-hosted)** (`grafana-mcp`) — local `grafana/mcp-grafana` Docker MCP server (stdio) for self-hosted Grafana or token-based setups.
 
 See each plugin's `README.md` for its full tool reference.
 

@@ -1,7 +1,7 @@
 ---
 name: "grafana-mcp"
-displayName: "Grafana MCP"
-description: "AI-assisted Grafana observability: dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more via the official MCP server"
+displayName: "Grafana (self-hosted)"
+description: "For self-hosted Grafana OSS and Enterprise: runs the Grafana MCP server locally in Docker with a service-account token."
 keywords: ["grafana", "mcp", "observability", "dashboards", "prometheus", "loki", "alerting", "incidents", "oncall", "monitoring"]
 ---
 

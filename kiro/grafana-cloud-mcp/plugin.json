@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "grafana-cloud-mcp",
   "version": "0.2.0",
-  "description": "Hosted MCP server for AI-assisted Grafana Cloud observability: dashboards, datasources, Prometheus, Loki, Tempo, alerting, incidents, OnCall, and more — no local installation required",
+  "description": "For Grafana Cloud: a hosted MCP server with OAuth sign-in for dashboards, metrics, logs, traces, alerts, and incidents. Nothing to install.",
   "author": {
     "name": "Grafana Labs",
     "email": "grafana-assistant@grafana.com"

@@ -1,7 +1,7 @@
 ---
 name: "grafana-cloud-mcp"
-displayName: "Grafana Cloud MCP"
-description: "Hosted MCP server for AI-assisted Grafana Cloud observability: dashboards, datasources, Prometheus, Loki, Tempo, alerting, incidents, OnCall, and more — no local installation required"
+displayName: "Grafana Cloud"
+description: "For Grafana Cloud: a hosted MCP server with OAuth sign-in for dashboards, metrics, logs, traces, alerts, and incidents. Nothing to install."
 keywords: ["grafana", "mcp", "cloud", "observability", "dashboards", "prometheus", "loki", "tempo", "alerting", "incidents", "oncall", "monitoring"]
 ---
 

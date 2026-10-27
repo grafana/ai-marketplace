@@ -11,19 +11,14 @@
   },
   "plugins": [
     {
-      "name": "grafana-assistant",
-      "source": "plugins/grafana-assistant",
-      "description": "Skills and rules for developing and using the Grafana Assistant app and CLI — query metrics, logs, traces, and run AI-assisted observability investigations via the A2A API"
-    },
-    {
       "name": "grafana-cloud-mcp",
       "source": "plugins/grafana-cloud-mcp",
-      "description": "Hosted MCP server for AI-assisted Grafana Cloud observability: dashboards, datasources, Prometheus, Loki, Tempo, alerting, incidents, OnCall, and more — no local installation required"
+      "description": "For Grafana Cloud: a hosted MCP server with OAuth sign-in for dashboards, metrics, logs, traces, alerts, and incidents. Nothing to install."
     },
     {
       "name": "grafana-mcp",
       "source": "plugins/grafana-mcp",
-      "description": "AI-assisted Grafana observability: dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more via the official MCP server"
+      "description": "For self-hosted Grafana OSS and Enterprise: runs the Grafana MCP server locally in Docker with a service-account token."
     }
   ]
 }

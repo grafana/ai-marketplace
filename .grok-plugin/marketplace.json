@@ -7,26 +7,8 @@
   },
   "plugins": [
     {
-      "name": "grafana-assistant",
-      "description": "Skills and rules for developing and using the Grafana Assistant app and CLI.",
-      "source": {
-        "type": "local",
-        "path": "./plugins/grafana-assistant"
-      },
-      "category": "monitoring",
-      "homepage": "https://github.com/grafana/ai-marketplace",
-      "keywords": [
-        "grafana",
-        "grafana assistant"
-      ],
-      "domains": [
-        "grafana.com",
-        "grafana.net"
-      ]
-    },
-    {
       "name": "grafana-cloud-mcp",
-      "description": "Hosted MCP server for AI-assisted Grafana Cloud observability — no local installation required.",
+      "description": "For Grafana Cloud: a hosted MCP server with OAuth sign-in for dashboards, metrics, logs, traces, alerts, and incidents. Nothing to install.",
       "source": {
         "type": "local",
         "path": "./plugins/grafana-cloud-mcp"
@@ -44,7 +26,7 @@
     },
     {
       "name": "grafana-mcp",
-      "description": "MCP server for AI-assisted Grafana observability — dashboards, datasources, Prometheus, Loki, alerting, incidents, and OnCall.",
+      "description": "For self-hosted Grafana OSS and Enterprise: runs the Grafana MCP server locally in Docker with a service-account token.",
       "source": {
         "type": "local",
         "path": "./plugins/grafana-mcp"
