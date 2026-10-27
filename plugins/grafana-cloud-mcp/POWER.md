@@ -5,7 +5,7 @@ description: "For Grafana Cloud: a hosted MCP server with OAuth sign-in for dash
 keywords: ["grafana", "mcp", "cloud", "observability", "dashboards", "prometheus", "loki", "tempo", "alerting", "incidents", "oncall", "monitoring"]
 ---
 
-# Grafana Cloud MCP
+# Grafana Cloud
 
 Connects to the hosted [Grafana Cloud MCP server](https://grafana.com/docs/grafana-cloud/developer-resources/assistant/configure/cloud-mcp/) — 60+ tools for AI-assisted observability workflows across dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, and more.
 

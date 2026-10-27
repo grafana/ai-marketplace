@@ -18,7 +18,7 @@
     {
       "name": "grafana-mcp",
       "source": "grafana-mcp",
-      "description": "For self-hosted Grafana OSS and Enterprise: runs the Grafana MCP server locally in Docker with a service-account token."
+      "description": "For self-hosted Grafana, or any Grafana with a service-account token: dashboards, Prometheus, Loki, alerting, incidents, and OnCall via the Grafana MCP server, run locally in Docker."
     }
   ]
 }

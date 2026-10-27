@@ -73,6 +73,8 @@ Cursor, Kiro, and Grok Build install from their respective marketplace UIs.
 
 See each plugin's `README.md` for its full tool reference.
 
+The `grafana-assistant` plugin has been removed, along with its skill for the deprecated Grafana Assistant CLI. To ask Grafana Assistant questions from an agent, use the Grafana Cloud plugin's `ask_assistant` tool.
+
 ## Architecture
 
 Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, Codex, Antigravity, and Agent Plugins (Kiro) manifests, the MCP configs, the `POWER.md` frontmatter, and the marketplace indexes' `plugins` lists are generated from one `plugin.src.json` per plugin, which holds the shared fields plus any format-specific ones.

@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "grafana-mcp",
-  "version": "0.2.0",
-  "description": "For self-hosted Grafana OSS and Enterprise: runs the Grafana MCP server locally in Docker with a service-account token.",
+  "version": "0.3.0",
+  "description": "For self-hosted Grafana, or any Grafana with a service-account token: dashboards, Prometheus, Loki, alerting, incidents, and OnCall via the Grafana MCP server, run locally in Docker.",
   "author": {
     "name": "Grafana Labs",
     "email": "grafana-assistant@grafana.com"

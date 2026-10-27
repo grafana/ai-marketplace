@@ -1,4 +1,4 @@
-# Grafana Cloud MCP
+# Grafana Cloud
 
 Plugin that connects AI agents to the hosted [Grafana Cloud MCP server](https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/) for AI-assisted observability workflows.
 

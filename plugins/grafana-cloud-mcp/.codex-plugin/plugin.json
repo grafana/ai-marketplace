@@ -1,6 +1,6 @@
 {
   "name": "grafana-cloud-mcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Connect Codex to your Grafana Cloud stack to query metrics, logs, traces, and profiles, investigate incidents, act on dashboards and alerts, and ask Grafana Assistant—all through a single hosted MCP endpoint with no self-hosting required.",
   "author": {
     "name": "Grafana Labs",
