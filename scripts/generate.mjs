@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Generates each plugin's per-platform manifests, MCP configs and POWER.md
-// frontmatter from its plugins/<name>/plugin.src.json, plus the "plugins" list
+// frontmatter from its sources/<name>.json, plus the "plugins" list
 // of every self-hosted marketplace index and a Kiro power under kiro/<name>/. Run with --check to fail instead of writing when
 // a generated file is out of date (used in CI).
 
@@ -124,26 +124,6 @@ function typedMcpServers(servers, userConfig = {}) {
   );
 }
 
-// Cursor only expands environment variables written as ${env:NAME}.
-function cursorMcpServers(servers) {
-  const rewrite = (value) =>
-    typeof value === "string" ? value.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, "${env:$1}") : value;
-  const rewriteValues = (object) =>
-    object && Object.fromEntries(Object.entries(object).map(([key, value]) => [key, rewrite(value)]));
-
-  return Object.fromEntries(
-    Object.entries(servers).map(([name, server]) => [
-      name,
-      merge(server, {
-        url: rewrite(server.url),
-        args: server.args?.map(rewrite),
-        env: rewriteValues(server.env),
-        headers: rewriteValues(server.headers),
-      }),
-    ])
-  );
-}
-
 // A platform's overrides for its own files; "marketplace" only affects the index entry.
 // Its null values are kept so the final merge can remove the shared field.
 function overrides(source, platform) {
@@ -200,13 +180,9 @@ function generatedFiles(source) {
     );
   }
 
-  // Inline servers keep Cursor off mcp.json, which is in the Agent Plugins format.
+  // Cursor finds the servers in mcp.json on its own.
   if (platforms.cursor) {
-    files[".cursor-plugin/plugin.json"] = merge(
-      base,
-      { logo: source.logo, mcpServers: source.mcpServers && cursorMcpServers(source.mcpServers) },
-      overrides(source, "cursor")
-    );
+    files[".cursor-plugin/plugin.json"] = merge(base, { logo: source.logo }, overrides(source, "cursor"));
   }
 
   if (platforms.codex) {
@@ -292,12 +268,23 @@ function powerMd(source, current, displayPath) {
   return `---\n${lines.join("\n")}\n---\n${current.slice(match[0].length)}`;
 }
 
-async function readSources(pluginsDir) {
+// Sources live outside the plugin directories so they aren't shipped with each plugin.
+async function readSources(pluginsDir, sourcesDir) {
   const sources = [];
-  for (const entry of await fs.readdir(pluginsDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
+  const pluginNames = (await fs.readdir(pluginsDir, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
 
-    const sourcePath = path.join(pluginsDir, entry.name, "plugin.src.json");
+  for (const file of await fs.readdir(sourcesDir)) {
+    const name = file.replace(/\.json$/, "");
+    if (!pluginNames.includes(name)) {
+      throw new Error(`${path.join("sources", file)} has no plugins/${name}/ directory.`);
+    }
+  }
+
+  for (const name of pluginNames) {
+    const entry = { name };
+    const sourcePath = path.join(sourcesDir, `${name}.json`);
     let source;
     try {
       source = JSON.parse(await fs.readFile(sourcePath, "utf8"));
@@ -306,7 +293,7 @@ async function readSources(pluginsDir) {
     }
 
     if (source.name !== entry.name) {
-      throw new Error(`${path.relative(repoRoot, sourcePath)}: "name" must match the directory name "${entry.name}".`);
+      throw new Error(`${path.relative(repoRoot, sourcePath)}: "name" must match the file name "${entry.name}".`);
     }
     source.platforms ??= {};
     sources.push(source);
@@ -327,7 +314,7 @@ const jsonText = (content) => `${JSON.stringify(content, null, 2)}\n`;
 
 async function main() {
   const pluginsDir = path.join(repoRoot, "plugins");
-  const sources = await readSources(pluginsDir);
+  const sources = await readSources(pluginsDir, path.join(repoRoot, "sources"));
   // Repo-relative path -> expected content, or null for a file to remove.
   const outputs = new Map();
   const kiroOutputs = new Map();
@@ -407,7 +394,7 @@ async function main() {
   }
 
   if (stale.length > 0) {
-    console.error("Generated files are out of date. Edit plugin.src.json, then run `node scripts/generate.mjs`:");
+    console.error("Generated files are out of date. Edit sources/<name>.json, then run `node scripts/generate.mjs`:");
     for (const file of stale) {
       console.error(`- ${file}`);
     }

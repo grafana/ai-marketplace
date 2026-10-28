@@ -29,37 +29,16 @@ Installation instructions, binaries, Docker images and Helm charts: [github.com/
 ### Setup steps
 
 1. Create a [service account](https://grafana.com/docs/grafana/latest/administration/service-accounts/) in Grafana with at least the **Viewer** role (**Editor** for write operations), and generate a token.
-
-2. Set the environment variables:
-   ```bash
-   export GRAFANA_URL="https://mystack.grafana.net"
-   export GRAFANA_SERVICE_ACCOUNT_TOKEN="glsa_..."
-   ```
-
+2. Give the server the Grafana URL and the token. Claude Code asks for both when the plugin is enabled. Other agents read them from the `GRAFANA_URL` and `GRAFANA_SERVICE_ACCOUNT_TOKEN` environment variables; the plugin's README shows how.
 3. The MCP server starts when your agent loads the plugin.
 
 ### Docker and local Grafana
 
-When the server runs in Docker and Grafana runs on the host, use `host.docker.internal` instead of `localhost`:
-
-```bash
-export GRAFANA_URL="http://host.docker.internal:3000"
-```
+When the server runs in Docker and Grafana runs on the host, use `http://host.docker.internal:3000` as the Grafana URL instead of `http://localhost:3000`.
 
 ### Binary instead of Docker
 
-To run the binary, point the server entry in your agent's MCP config at `mcp-grafana`:
-
-```json
-{
-  "command": "mcp-grafana",
-  "args": [],
-  "env": {
-    "GRAFANA_URL": "${GRAFANA_URL}",
-    "GRAFANA_SERVICE_ACCOUNT_TOKEN": "${GRAFANA_SERVICE_ACCOUNT_TOKEN}"
-  }
-}
-```
+The server also ships as a binary, `mcp-grafana`. To use it, point the server entry in your agent's MCP config at `mcp-grafana` instead of `docker`, with the same two settings. The [mcp-grafana README](https://github.com/grafana/mcp-grafana) has examples for each agent.
 
 ## CLI flags
 

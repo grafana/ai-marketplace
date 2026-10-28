@@ -77,18 +77,18 @@ The `grafana-assistant` plugin has been removed, along with its skill for the de
 
 ## Architecture
 
-Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, Codex, Antigravity, and Agent Plugins (Kiro) manifests, the MCP configs, the `POWER.md` frontmatter, and the marketplace indexes' `plugins` lists are generated from one `plugin.src.json` per plugin, which holds the shared fields plus any format-specific ones.
+Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, Codex, Antigravity, and Agent Plugins (Kiro) manifests, the MCP configs, the `POWER.md` frontmatter, and the marketplace indexes' `plugins` lists are generated from one source file per plugin, `sources/<name>.json`, which holds the shared fields plus any format-specific ones. Sources sit outside the plugin directories so they aren't shipped with the plugins.
 
 ```text
+sources/grafana-cloud-mcp.json   # Source for the generated files below
 plugins/grafana-cloud-mcp/
-├── plugin.src.json              # Source for the generated files below
-├── .cursor-plugin/plugin.json   # Cursor manifest, with MCP servers inline (generated)
+├── .cursor-plugin/plugin.json   # Cursor manifest (generated)
 ├── .claude-plugin/plugin.json   # Claude Code manifest (generated)
 ├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata, generated)
 ├── .antigravity-plugin/plugin.json # Antigravity manifest (generated)
 ├── POWER.md                     # Legacy Kiro manifest (generated frontmatter + hand-written onboarding)
 ├── .mcp.json                    # Hosted MCP server config (Streamable HTTP, generated)
-├── mcp.json                     # MCP config for Kiro's POWER.md loader and Factory (generated)
+├── mcp.json                     # MCP config for Cursor, Kiro's POWER.md loader and Factory (generated)
 ├── mcp_config.json              # Antigravity MCP config (generated)
 ├── skills/                      # Shared skills (SKILL.md)
 ├── assets/logo.svg              # Marketplace/listing logo
@@ -113,15 +113,15 @@ Root marketplace manifests:
 - `.kiro-power/marketplace.json` — Kiro Powers registry
 - `.agents/plugins/marketplace.json` — Codex marketplace
 
-CI checks that the generated files match their `plugin.src.json`.
+CI checks that the generated files match their source.
 
 ## Development
 
-After editing a `plugin.src.json`, regenerate the manifests, then validate the plugin structure across all formats:
+After editing a file in `sources/`, regenerate the manifests, then validate the plugin structure across all formats:
 
 ```bash
 node scripts/generate.mjs
 node scripts/validate-template.mjs
 ```
 
-To add a plugin, create a directory under `plugins/` with a `plugin.src.json` and run the generator; it registers the plugin in each targeted marketplace. See `docs/add-a-plugin.md` for details.
+To add a plugin, create a directory under `plugins/`, add `sources/<name>.json`, and run the generator; it registers the plugin in each targeted marketplace. See `docs/add-a-plugin.md` for details.
