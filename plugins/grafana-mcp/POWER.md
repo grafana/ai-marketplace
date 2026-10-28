@@ -7,9 +7,9 @@ keywords: ["grafana", "mcp", "observability", "dashboards", "prometheus", "loki"
 
 # Grafana (self-hosted)
 
-Exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) — 50+ tools for AI-assisted observability workflows across dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more.
+Exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) — dozens of tools for AI-assisted observability workflows across dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more.
 
-> **Note:** This power adds 50+ MCP tools to your context window. Only enable it when you need to interact with a live Grafana instance.
+> **Note:** This power adds dozens of MCP tools to your context window. Only enable it when you need to interact with a live Grafana instance.
 
 ## Onboarding
 

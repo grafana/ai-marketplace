@@ -1,17 +1,17 @@
 ---
 name: grafana-mcp-tools
-description: Install, configure, and use the Grafana MCP server effectively. Covers setup via Docker or binary, environment variables, tool categories, RBAC, and best practices for context window management. Use when the user wants to set up mcp-grafana, configure Grafana MCP tools, or needs guidance on which MCP tool to use.
+description: Install, configure, and use the Grafana MCP server (mcp-grafana) effectively. Covers setup via Docker or binary, environment variables, CLI flags, choosing tools, RBAC, and best practices for context window management. Use when the user wants to set up mcp-grafana, configure which Grafana MCP tools are enabled, or needs guidance on using the Grafana MCP tools.
 ---
 
 # Grafana MCP Server
 
-MCP server exposing 50+ Grafana API tools. Supports Grafana 9.0+ (local and Grafana Cloud).
+The open-source Grafana MCP server, [mcp-grafana](https://github.com/grafana/mcp-grafana). It runs locally and connects to any Grafana 9.0+ instance, self-hosted or Grafana Cloud, with a service account token.
 
 ## Prerequisites
 
-The MCP server must already be installed. **Do not attempt to install it automatically.** If it is not available, stop and tell the user to install it first.
+The MCP server must already be installed. **Don't try to install it yourself.** If it isn't available, stop and tell the user to install it first.
 
-Installation instructions, pre-built binaries, Docker images, and Helm charts: [github.com/grafana/mcp-grafana](https://github.com/grafana/mcp-grafana)
+Installation instructions, binaries, Docker images and Helm charts: [github.com/grafana/mcp-grafana](https://github.com/grafana/mcp-grafana)
 
 ## Configuration
 
@@ -21,50 +21,42 @@ Installation instructions, pre-built binaries, Docker images, and Helm charts: [
 |---|---|
 | `GRAFANA_URL` | Grafana instance URL (default: `http://localhost:3000`) |
 | `GRAFANA_SERVICE_ACCOUNT_TOKEN` | Service account token (recommended) |
-| `GRAFANA_API_KEY` | API key (deprecated, use service account token) |
+| `GRAFANA_API_KEY` | API key (deprecated; use a service account token) |
 | `GRAFANA_USERNAME` + `GRAFANA_PASSWORD` | Basic auth |
 | `GRAFANA_ORG_ID` | Organization ID for multi-org setups |
 | `GRAFANA_EXTRA_HEADERS` | JSON object with custom HTTP headers |
 
 ### Setup steps
 
-1. Create a [service account](https://grafana.com/docs/grafana/latest/administration/service-accounts/) in Grafana with at least **Viewer** role (or **Editor** for write operations). Generate a token.
+1. Create a [service account](https://grafana.com/docs/grafana/latest/administration/service-accounts/) in Grafana with at least the **Viewer** role (**Editor** for write operations), and generate a token.
 
-2. Set environment variables:
+2. Set the environment variables:
    ```bash
    export GRAFANA_URL="https://mystack.grafana.net"
    export GRAFANA_SERVICE_ACCOUNT_TOKEN="glsa_..."
    ```
 
-3. The MCP server starts automatically when Cursor loads the plugin.
+3. The MCP server starts when your agent loads the plugin.
 
-### Docker config for local Grafana
+### Docker and local Grafana
 
-When connecting to `localhost` from Docker, use `host.docker.internal`:
+When the server runs in Docker and Grafana runs on the host, use `host.docker.internal` instead of `localhost`:
 
-```json
-{
-  "env": {
-    "GRAFANA_URL": "http://host.docker.internal:3000"
-  }
-}
+```bash
+export GRAFANA_URL="http://host.docker.internal:3000"
 ```
 
-### Binary config (alternative to Docker)
+### Binary instead of Docker
 
-If you prefer the binary over Docker, update `mcp.json`:
+To run the binary, point the server entry in your agent's MCP config at `mcp-grafana`:
 
 ```json
 {
-  "mcpServers": {
-    "grafana": {
-      "command": "mcp-grafana",
-      "args": [],
-      "env": {
-        "GRAFANA_URL": "${GRAFANA_URL}",
-        "GRAFANA_SERVICE_ACCOUNT_TOKEN": "${GRAFANA_SERVICE_ACCOUNT_TOKEN}"
-      }
-    }
+  "command": "mcp-grafana",
+  "args": [],
+  "env": {
+    "GRAFANA_URL": "${GRAFANA_URL}",
+    "GRAFANA_SERVICE_ACCOUNT_TOKEN": "${GRAFANA_SERVICE_ACCOUNT_TOKEN}"
   }
 }
 ```
@@ -73,121 +65,44 @@ If you prefer the binary over Docker, update `mcp.json`:
 
 | Flag | Description |
 |---|---|
-| `-t, --transport` | Transport type: `stdio` (default), `sse`, `streamable-http` |
+| `-t, --transport` | `stdio` (default), `sse`, or `streamable-http` |
 | `--address` | Host:port for SSE/HTTP (default: `localhost:8000`) |
-| `--debug` | Enable debug logging |
 | `--log-level` | `debug`, `info`, `warn`, `error` |
-| `--disable-write` | Read-only mode (no create/update/delete tools) |
-| `--enabled-tools` | Comma-separated list of enabled tool categories |
-| `--metrics` | Enable Prometheus metrics at `/metrics` |
+| `--disable-write` | Read-only mode: no tools that create, change or delete |
+| `--enabled-tools` | Comma-separated tool categories to enable |
+| `--disable-<category>` | Turn off one category |
 
-## Tool categories
+Some categories are off by default. `mcp-grafana --help` lists every category and the default set for the installed version.
 
-### Dashboards
+## Choosing tools
 
-- `search_dashboards` — search by title/metadata
-- `get_dashboard_summary` — compact overview (preferred over full JSON)
-- `get_dashboard_property` — extract specific parts via JSONPath
-- `get_dashboard_panel_queries` — get panel queries and datasource info
-- `get_dashboard_by_uid` — full dashboard JSON (large, avoid unless needed)
-- `update_dashboard` — create or update a dashboard
-- `patch_dashboard` — targeted modifications without full JSON
+The tool list changes between releases, so this skill doesn't list tools. Rely on the server instead:
 
-### Datasources
+- Read each tool's description from the server. It says what the tool does and when to use it, and it matches the installed version.
+- Pick tools by what the user is asking about. There are categories for dashboards, data sources, Prometheus, Loki, Tempo and Pyroscope queries, SQL and other data sources, alerting, incidents, OnCall, annotations, deep links and panel rendering.
+- If the user expects a tool that isn't there, its category may be disabled, or the server may be in read-only mode. Point them to `--enabled-tools` or `--disable-write` rather than guessing at a name.
 
-- `list_datasources` — list all datasources
-- `get_datasource_by_uid` / `get_datasource_by_name` — get datasource details
+## Keeping context small
 
-### Prometheus
+- Prefer the tools that return a dashboard's summary or a single property over the one that returns its full JSON. For edits, prefer targeted changes over resending the whole dashboard.
+- Search for dashboards, folders and data sources before fetching one by UID.
+- Discover metric and label names before writing PromQL or LogQL, rather than guessing.
+- Give link-generating tools priority when presenting results: a clickable deep link beats describing how to navigate there.
+- Enable only the categories you need. Every enabled tool costs context.
 
-- `query_prometheus` — execute PromQL queries
-- `list_prometheus_metric_metadata` — get metric metadata
-- `list_prometheus_metric_names` — list available metrics
-- `list_prometheus_label_names` / `list_prometheus_label_values` — label discovery
-- `query_prometheus_histogram` — calculate histogram percentiles
+## Querying
 
-### Loki
+- Always set a time range. Start narrow (the last hour, say) and widen it only if needed.
+- In Loki, use label matchers to select streams before filtering on line content.
+- Aggregate before returning series: a `sum by (...)` or `topk` is usually more useful than hundreds of raw series.
 
-- `query_loki_logs` — query logs/metrics using LogQL
-- `list_loki_label_names` / `list_loki_label_values` — label discovery
-- `query_loki_stats` — stream statistics
-- `query_loki_patterns` — detected log patterns
+## Safety
 
-### Alerting
+- Don't make changes (dashboards, alert rules, incidents, annotations) unless the user asked for them. Confirm before anything destructive.
+- Use `--disable-write` when write access isn't needed.
 
-- `list_alert_rules` / `get_alert_rule_by_uid` — read alert rules
-- `create_alert_rule` / `update_alert_rule` / `delete_alert_rule` — manage rules
-- `list_contact_points` — notification endpoints
+## RBAC
 
-### Incidents
-
-- `list_incidents` / `get_incident` — read incidents
-- `create_incident` / `add_activity_to_incident` — manage incidents
-
-### OnCall
-
-- `list_oncall_schedules` / `get_oncall_shift` / `get_current_oncall_users` — schedules
-- `list_oncall_teams` / `list_oncall_users` — team/user discovery
-- `list_alert_groups` / `get_alert_group` — alert groups
-
-### Sift (investigation)
-
-- `list_sift_investigations` / `get_sift_investigation` / `get_sift_analysis`
-- `find_error_pattern_logs` / `find_slow_requests`
-
-### Pyroscope (profiling)
-
-- `list_pyroscope_label_names` / `list_pyroscope_label_values`
-- `list_pyroscope_profile_types` / `fetch_pyroscope_profile`
-
-### Annotations
-
-- `get_annotations` / `create_annotation` / `update_annotation` / `patch_annotation`
-- `create_graphite_annotation` / `get_annotation_tags`
-
-### Navigation
-
-- `generate_deeplink` — generate URLs for dashboards, panels, Explore
-
-### Rendering
-
-- `get_panel_image` — render panel/dashboard as PNG (requires Image Renderer)
-
-### Disabled by default
-
-These categories must be explicitly enabled with `--enabled-tools`:
-
-- **ClickHouse**: `list_clickhouse_tables`, `describe_clickhouse_table`, `query_clickhouse`
-- **CloudWatch**: `list_cloudwatch_namespaces`, `list_cloudwatch_metrics`, `list_cloudwatch_dimensions`, `query_cloudwatch`
-- **Elasticsearch**: `query_elasticsearch`
-- **Admin**: `list_teams`, `list_users_by_org`, `list_all_roles`, `get_role_details`, `get_role_assignments`
-- **Search Logs**: `search_logs` (high-level across ClickHouse and Loki)
-- **Query Examples**: `get_query_examples`
-
-## Best practices
-
-### Context window management
-
-- Use `get_dashboard_summary` instead of `get_dashboard_by_uid` to avoid consuming context with full dashboard JSON.
-- Use `get_dashboard_property` with JSONPath to extract only the specific parts you need.
-- Prefer `patch_dashboard` for targeted modifications over `update_dashboard` with full payload.
-- Use `search_dashboards` to discover dashboards before retrieving by UID.
-- When presenting Grafana data, use `generate_deeplink` to provide clickable URLs rather than describing navigation steps.
-
-### Querying
-
-- When querying Prometheus, always specify a reasonable time range to avoid overwhelming results.
-- When querying Loki, prefer targeted LogQL selectors with label matchers over broad queries.
-- Use datasource discovery tools (`list_datasources`, `list_prometheus_metric_names`) before writing queries.
-
-### Safety
-
-- Avoid write operations (`update_dashboard`, `create_incident`, `create_alert_rule`) unless explicitly asked by the user.
-- Use `--disable-write` flag for read-only mode when write access isn't needed.
-- Disable unused tool categories with `--enabled-tools` to reduce attack surface and context usage.
-
-### RBAC
-
-- **Viewer** role: sufficient for all read operations (dashboards, datasources, queries, annotations)
-- **Editor** role: required for write operations (create/update dashboards, alerts, incidents)
-- For fine-grained control, use custom roles with specific permissions per tool (see [mcp-grafana README](https://github.com/grafana/mcp-grafana) for the full RBAC matrix)
+- **Viewer**: enough for read operations (dashboards, data sources, queries, annotations).
+- **Editor**: needed for write operations (dashboards, alert rules, incidents).
+- For finer control, give the service account a custom role. The [mcp-grafana README](https://github.com/grafana/mcp-grafana) lists the permissions each tool needs.

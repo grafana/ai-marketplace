@@ -68,7 +68,7 @@ Cursor, Kiro, and Grok Build install from their respective marketplace UIs.
 
 ## What's included
 
-- **Grafana Cloud** (`grafana-cloud-mcp`) — hosted Grafana Cloud MCP server (OAuth 2.1), plus the `grafana-cloud-mcp-tools` skill covering 60+ tools for dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, annotations, and Grafana Assistant (`ask_assistant`). Packaged for Codex as an app-plus-skills plugin.
+- **Grafana Cloud** (`grafana-cloud-mcp`) — hosted Grafana Cloud MCP server (OAuth 2.1), plus the `grafana-cloud-mcp-tools` skill covering dozens of tools for dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, annotations, and Grafana Assistant (`ask_assistant`). Packaged for Codex as an app-plus-skills plugin.
 - **Grafana (self-hosted)** (`grafana-mcp`) — local `grafana/mcp-grafana` Docker MCP server (stdio) for self-hosted Grafana or token-based setups.
 
 See each plugin's `README.md` for its full tool reference.
