@@ -1,7 +1,7 @@
 {
   "name": "grafana-mcp",
   "displayName": "Grafana (self-hosted)",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "For self-hosted Grafana, or any Grafana with a service-account token: dashboards, Prometheus, Loki, alerting, incidents, and OnCall via the Grafana MCP server, run locally in Docker.",
   "author": {
     "name": "Grafana Labs",
@@ -18,26 +18,5 @@
     "prometheus",
     "loki"
   ],
-  "logo": "assets/logo.svg",
-  "mcpServers": {
-    "grafana": {
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-i",
-        "-e",
-        "GRAFANA_URL",
-        "-e",
-        "GRAFANA_SERVICE_ACCOUNT_TOKEN",
-        "grafana/mcp-grafana",
-        "-t",
-        "stdio"
-      ],
-      "env": {
-        "GRAFANA_URL": "${env:GRAFANA_URL}",
-        "GRAFANA_SERVICE_ACCOUNT_TOKEN": "${env:GRAFANA_SERVICE_ACCOUNT_TOKEN}"
-      }
-    }
-  }
+  "logo": "assets/logo.svg"
 }

@@ -1,7 +1,7 @@
 {
   "name": "grafana-cloud-mcp",
   "displayName": "Grafana Cloud",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "For Grafana Cloud: a hosted MCP server with OAuth sign-in for dashboards, metrics, logs, traces, alerts, and incidents. Nothing to install.",
   "author": {
     "name": "Grafana Labs",
