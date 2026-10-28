@@ -1,0 +1,29 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "grafana-cloud-mcp",
+  "displayName": "Grafana Cloud",
+  "version": "0.3.0",
+  "description": "Query Grafana Cloud metrics, logs, traces and profiles, manage dashboards, alerts and incidents, and ask Grafana Assistant through the hosted MCP server.",
+  "author": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com"
+  },
+  "homepage": "https://github.com/grafana/ai-marketplace/tree/main/plugins/grafana-cloud-mcp",
+  "repository": "https://github.com/grafana/ai-marketplace",
+  "license": "Apache-2.0",
+  "keywords": [
+    "grafana",
+    "mcp",
+    "cloud",
+    "observability",
+    "dashboards",
+    "prometheus",
+    "loki"
+  ],
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "Ask Grafana Assistant why checkout latency is spiking right now",
+    "Investigate errors from the latest deployment",
+    "Summarize active incidents and related alerts"
+  ]
+}

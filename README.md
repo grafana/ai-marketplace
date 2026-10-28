@@ -7,8 +7,8 @@ Plugin marketplace for AI-assisted Grafana observability workflows in **Cursor**
 | You use | Install |
 | --- | --- |
 | **Grafana Cloud** with claude.ai, Claude Desktop, mobile, or Cowork | The **Grafana Cloud connector** |
-| **Grafana Cloud** with Claude Code, Cursor, Kiro, Grok Build, or Codex | The **`grafana-cloud-mcp`** plugin |
-| **Self-hosted Grafana** (or you need a service-account token) | The **`grafana-mcp`** plugin |
+| **Grafana Cloud** with Claude Code, Cursor, Kiro, Grok Build, or Codex | The **Grafana Cloud** plugin (`grafana-cloud-mcp`) |
+| **Self-hosted Grafana** (or you need a service-account token) | The **Grafana (self-hosted)** plugin (`grafana-mcp`) |
 
 The Grafana Cloud connector and the `grafana-cloud-mcp` plugin are not alternatives — they use the **same** hosted server (`https://mcp.grafana.com/mcp`) and the same sign-in. The plugin adds skills that teach the agent how to use the tools well. Install the plugin as well as the connector if your app supports plugins; you'll see one set of tools, not two.
 
@@ -21,6 +21,8 @@ The Grafana Cloud connector and the `grafana-cloud-mcp` plugin are not alternati
    - **Free, Pro, or Max:** go to [**Customize → Connectors**](https://claude.ai/customize/connectors), choose **Add custom connector**, and enter `https://mcp.grafana.com/mcp`.
    - **Team or Enterprise:** an Owner adds it once for the organization under [**Organization settings → Connectors**](https://claude.ai/admin-settings/connectors) (**Add → Custom → Web**, URL `https://mcp.grafana.com/mcp`). Members can't add custom connectors themselves; it then appears for them under **Customize → Connectors** with a **Custom** label.
 3. Select **Connect**, enter your Grafana Cloud URL, and authorize in your browser. Choose read-only or read + write access during consent.
+
+Grafana Cloud is also listed in the [Claude Connectors Directory](https://claude.com/marketplace/connectors/grafana-cloud), which you can add it from instead of entering the URL.
 
 ### Grafana Cloud in coding agents (plugin)
 
@@ -66,28 +68,42 @@ Cursor, Kiro, and Grok Build install from their respective marketplace UIs.
 
 ## What's included
 
-- **`grafana-cloud-mcp`** — hosted Grafana Cloud MCP server (OAuth 2.1), plus the `grafana-cloud-mcp-tools` skill covering 60+ tools for dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, annotations, and Grafana Assistant (`ask_assistant`). Packaged for Codex as an app-plus-skills plugin.
-- **`grafana-mcp`** — local `grafana/mcp-grafana` Docker MCP server (stdio) for self-hosted Grafana or token-based setups.
-- **`grafana-assistant`** — skills and rules for developing and using the Grafana Assistant app and CLI (Cursor/Claude/Kiro/Grok).
+- **Grafana Cloud** (`grafana-cloud-mcp`) — hosted Grafana Cloud MCP server (OAuth 2.1), plus the `grafana-cloud-mcp-tools` skill covering dozens of tools for dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, annotations, and Grafana Assistant (`ask_assistant`). Packaged for Codex as an app-plus-skills plugin.
+- **Grafana (self-hosted)** (`grafana-mcp`) — local `grafana/mcp-grafana` Docker MCP server (stdio) for self-hosted Grafana or token-based setups.
 
 See each plugin's `README.md` for its full tool reference.
 
+The `grafana-assistant` plugin has been removed, along with its skill for the deprecated Grafana Assistant CLI. To ask Grafana Assistant questions from an agent, use the Grafana Cloud plugin's `ask_assistant` tool.
+
 ## Architecture
 
-Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform, and platform manifests are not automatically identical — each format has its own manifest and, where needed, format-specific fields.
+Each plugin ships manifests for the platforms it targets and shares components (rules, skills, MCP config) where the formats allow. Not every plugin targets every platform. The Cursor, Claude Code, Codex, Antigravity, and Agent Plugins (Kiro) manifests, the MCP configs, the `POWER.md` frontmatter, and the marketplace indexes' `plugins` lists are generated from one `plugin.src.json` per plugin, which holds the shared fields plus any format-specific ones.
 
 ```text
 plugins/grafana-cloud-mcp/
-├── .cursor-plugin/plugin.json   # Cursor manifest
-├── .claude-plugin/plugin.json   # Claude Code manifest
+├── plugin.src.json              # Source for the generated files below
+├── .cursor-plugin/plugin.json   # Cursor manifest, with MCP servers inline (generated)
+├── .claude-plugin/plugin.json   # Claude Code manifest (generated)
 ├── .grok-plugin/plugin.json     # Grok Build manifest (when targeted)
-├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata)
-├── POWER.md                     # Kiro manifest (frontmatter + onboarding)
-├── .mcp.json                    # Hosted MCP server config (Streamable HTTP)
-├── mcp.json                     # Shared MCP server config
+├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata, generated)
+├── .antigravity-plugin/plugin.json # Antigravity manifest (generated)
+├── POWER.md                     # Legacy Kiro manifest (generated frontmatter + hand-written onboarding)
+├── .mcp.json                    # Hosted MCP server config (Streamable HTTP, generated)
+├── mcp.json                     # MCP config for Kiro's POWER.md loader and Factory (generated)
+├── mcp_config.json              # Antigravity MCP config (generated)
 ├── skills/                      # Shared skills (SKILL.md)
 ├── assets/logo.svg              # Marketplace/listing logo
 └── steering/                    # Kiro steering files
+```
+
+Each plugin that targets Kiro also gets a generated power in the [Agent Plugins](https://agent-plugins.org) format, which Kiro's powers registry requires. It sits in its own folder so other hosts that fall back to a root `plugin.json` don't load it instead of their own manifest:
+
+```text
+kiro/grafana-cloud-mcp/
+├── plugin.json                  # Agent Plugins manifest
+├── mcp.json                     # Agent Plugins MCP config
+├── README.md                    # Copied from the plugin
+└── skills/                      # Copied from the plugin
 ```
 
 Root marketplace manifests:
@@ -98,14 +114,15 @@ Root marketplace manifests:
 - `.kiro-power/marketplace.json` — Kiro Powers registry
 - `.agents/plugins/marketplace.json` — Codex marketplace
 
-Versions are kept in sync across the Cursor and Claude Code formats and validated in CI.
+CI checks that the generated files match their `plugin.src.json`.
 
 ## Development
 
-Validate the plugin structure across all formats:
+After editing a `plugin.src.json`, regenerate the manifests, then validate the plugin structure across all formats:
 
 ```bash
+node scripts/generate.mjs
 node scripts/validate-template.mjs
 ```
 
-To add a plugin, create a directory under `plugins/` and register it in the applicable marketplace manifests. See `docs/add-a-plugin.md` for details.
+To add a plugin, create a directory under `plugins/` with a `plugin.src.json` and run the generator; it registers the plugin in each targeted marketplace. See `docs/add-a-plugin.md` for details.

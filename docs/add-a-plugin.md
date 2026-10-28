@@ -1,6 +1,6 @@
 # Add a plugin
 
-Add a new plugin under `plugins/` and register it in all applicable marketplace formats (Cursor, Claude Code, Kiro, Grok Build, and Codex). A plugin only needs manifests for the platforms it targets.
+Add a new plugin under `plugins/` with a `plugin.src.json` that lists the platforms it targets (Cursor, Claude Code, Kiro, Grok Build, and Codex). The generator writes its manifests and its entries in each platform's marketplace index.
 
 ## 1. Create plugin directory
 
@@ -10,16 +10,13 @@ Create a new folder:
 plugins/my-new-plugin/
 ```
 
-### Cursor + Claude Code manifests
+### Source manifest (`plugin.src.json`)
 
-Add the required manifests for both formats:
+The Cursor, Claude Code, and Codex manifests, the MCP configs, the `POWER.md` frontmatter, and the `plugins` list of every marketplace index are generated. Don't edit them by hand; write one source file instead:
 
 ```text
-plugins/my-new-plugin/.cursor-plugin/plugin.json
-plugins/my-new-plugin/.claude-plugin/plugin.json
+plugins/my-new-plugin/plugin.src.json
 ```
-
-Both manifests use the same schema. Example:
 
 ```json
 {
@@ -27,54 +24,44 @@ Both manifests use the same schema. Example:
   "displayName": "My New Plugin",
   "version": "0.1.0",
   "description": "Describe what this plugin does",
-  "author": {
-    "name": "Your Org"
-  },
-  "logo": "assets/logo.svg"
-}
-```
-
-Keep the two `plugin.json` files identical — the validation script will flag version mismatches.
-
-### Codex manifest
-
-For Codex, add a `.codex-plugin/plugin.json`:
-
-```text
-plugins/my-new-plugin/.codex-plugin/plugin.json
-```
-
-It uses the base plugin fields plus an `interface` block for the public listing, and may declare `mcpServers` and/or `skills`:
-
-```json
-{
-  "name": "my-new-plugin",
-  "version": "0.1.0",
-  "description": "Describe what this plugin does",
   "author": { "name": "Your Org" },
   "license": "Apache-2.0",
-  "mcpServers": "./.mcp.json",
-  "skills": "./skills/",
-  "interface": {
-    "displayName": "My New Plugin",
-    "logo": "./assets/logo.svg",
-    "shortDescription": "One line for the listing",
-    "longDescription": "Full listing description",
-    "developerName": "Your Org",
-    "category": "Productivity",
-    "capabilities": ["Interactive"],
-    "websiteURL": "https://example.com",
-    "privacyPolicyURL": "https://example.com/privacy",
-    "termsOfServiceURL": "https://example.com/terms"
+  "keywords": ["grafana"],
+  "logo": "assets/logo.svg",
+  "mcpServers": {
+    "my-server": { "url": "https://example.com/mcp" }
+  },
+  "platforms": {
+    "claude": {},
+    "cursor": {},
+    "kiro": {}
   }
 }
 ```
 
-For a hosted (Streamable HTTP) MCP server, point `mcpServers` at a `.mcp.json` with an `http` server entry rather than a local Docker command.
+- Shared fields (`name`, `displayName`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`) go into every generated manifest. `name` must match the directory.
+- `platforms` lists the platforms to generate for; each one also gets an entry in that platform's marketplace index. Each value is merged over the shared fields for that platform's files only; set a field to `null` to leave it out. Supported keys:
+  - `claude`: `.claude-plugin/plugin.json`
+  - `cursor`: `.cursor-plugin/plugin.json`, plus `logo` and the MCP servers inline
+  - `codex`: `.codex-plugin/plugin.json`; its `interface` gets `displayName` and `logo` filled in
+  - `kiro`: the frontmatter of `POWER.md` (`name`, `displayName`, `description`, `keywords`), with the `POWER.md` body hand-written, plus a power under `kiro/<name>/` in the [Agent Plugins](https://agent-plugins.org) format, which Kiro's powers registry requires: `plugin.json`, `mcp.json`, and copies of the plugin's `README.md` and `skills/`
+  - `antigravity`: `.antigravity-plugin/plugin.json` (add up to 3 `suggestedPrompts`, and a 120–160 character `description`) and `mcp_config.json`. Antigravity only lists plugins from its curated marketplace, so there is no index entry
+  - `grok`: no per-plugin file, only the marketplace entry
+- `platforms.<platform>.marketplace` adds fields to that plugin's marketplace index entry, e.g. Codex's `policy` and `category`, or Grok's `category`, `homepage`, `keywords`, and `domains`. The entry's `description` is the platform's `description` (shared or overridden) unless `marketplace` sets one.
+- `mcpServers` declares each server once, without a `type`: `url` for a hosted (Streamable HTTP) server, or `command`/`args`/`env` for a local one. The generator writes it in each platform's format: `"type": "http"` in `.mcp.json` (Claude Code, Codex), `"type": "http"` for remote servers in `mcp.json` (Kiro's `POWER.md` loader, Factory), `"type": "streamable-http"` or `"stdio"` in `kiro/<name>/mcp.json`, `serverUrl` in `mcp_config.json` (Antigravity), and inline in the Cursor manifest.
+- `userConfig` (optional) is Claude Code's install-time prompt, with an extra `env` field per option naming the environment variable it stands for. `${GRAFANA_URL}` in a server's `env` becomes `${user_config.grafana_url}` in `.mcp.json`. It can't be combined with `codex` or `antigravity`.
+
+Then generate:
+
+```bash
+node scripts/generate.mjs
+```
+
+For Codex, put the listing fields under `platforms.codex`. They usually include `mcpServers: "./.mcp.json"`, `skills: "./skills/"`, and an `interface` block (`shortDescription`, `longDescription`, `developerName`, `category`, `capabilities`, `websiteURL`, `privacyPolicyURL`, `termsOfServiceURL`, `defaultPrompt`, `brandColor`). See `plugins/grafana-cloud-mcp/plugin.src.json`.
 
 ### Kiro Power manifest
 
-Add a `POWER.md` file with YAML frontmatter and onboarding/steering instructions:
+Add a `POWER.md` file with onboarding/steering instructions. Start it with an empty frontmatter block (`---` and `---` lines) and run the generator to fill it in from `plugin.src.json` and `platforms.kiro`:
 
 ```text
 plugins/my-new-plugin/POWER.md
@@ -117,7 +104,7 @@ Add only the components you need. These are shared across all formats:
 - `agents/*.md` (YAML frontmatter required)
 - `commands/*.(md|mdc|markdown|txt)` (frontmatter recommended)
 - `hooks/hooks.json` and `scripts/*` for automation hooks
-- `mcp.json` for MCP server definitions
+- MCP server definitions go in `plugin.src.json` (generated into `mcp.json` and `.mcp.json`)
 - `assets/logo.svg` for marketplace display
 
 Kiro-specific additions:
@@ -125,9 +112,9 @@ Kiro-specific additions:
 - `POWER.md` — required for Kiro (replaces `plugin.json` as the manifest)
 - `steering/*.md` — optional workflow-specific guidance files referenced from `POWER.md`
 
-## 3. Register in the applicable marketplace formats
+## 3. Marketplace indexes
 
-Append a new entry to each marketplace manifest for the platforms your plugin targets:
+The `plugins` list in each marketplace index is generated from the `platforms` in every `plugin.src.json`, sorted by plugin name:
 
 - `.cursor-plugin/marketplace.json` (Cursor)
 - `.claude-plugin/marketplace.json` (Claude Code)
@@ -135,34 +122,25 @@ Append a new entry to each marketplace manifest for the platforms your plugin ta
 - `.grok-plugin/marketplace.json` (Grok Build)
 - `.agents/plugins/marketplace.json` (Codex)
 
-For Cursor, Claude Code, and Kiro:
+Only the top-level fields (`name`, `owner`, `metadata`, and so on) are hand-written. A Codex entry needs `policy` and `category` in `platforms.codex.marketplace`:
 
 ```json
-{
-  "name": "my-new-plugin",
-  "source": "plugins/my-new-plugin",
-  "description": "Describe your plugin"
-}
-```
-
-Use `plugins/my-new-plugin` as the source in the Cursor and Kiro manifests, and `./plugins/my-new-plugin` in the Claude Code manifest (with leading `./`). Grok uses its own entry shape (`source.type` / `source.path`, plus `category`, `keywords`, and `domains`).
-
-For Codex, register the plugin in `.agents/plugins/marketplace.json`:
-
-```json
-{
-  "name": "my-new-plugin",
-  "source": { "source": "local", "path": "./plugins/my-new-plugin" },
-  "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
-  "category": "Productivity"
+"codex": {
+  "marketplace": {
+    "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+    "category": "Productivity"
+  }
 }
 ```
 
 ## 4. Validate
 
 ```bash
+node scripts/generate.mjs --check
 node scripts/validate-template.mjs
 ```
+
+`--check` fails if a generated file doesn't match its `plugin.src.json`; CI runs it too.
 
 The script validates the Cursor, Claude Code, Kiro, and Codex formats and checks cross-format consistency. For Codex it parses `.agents/plugins/marketplace.json`, checks each entry's required `policy`/`category` fields and safe relative `source.path`, and validates the referenced `.codex-plugin/plugin.json`, its declared `.mcp.json`, and any `skills/*/SKILL.md` frontmatter. Fix all reported errors before committing.
 
@@ -191,12 +169,11 @@ If it was already installed, reinstall to pick up local changes:
 ## 6. Common pitfalls
 
 - Plugin `name` not kebab-case.
-- `source` path in marketplace manifest does not match folder name.
-- Missing `.cursor-plugin/plugin.json` or `.claude-plugin/plugin.json` in plugin folder.
+- Editing a generated manifest or MCP config instead of `plugin.src.json`.
 - Missing `POWER.md` in plugin folder (required for Kiro).
-- Version mismatch between the two `plugin.json` files.
-- `name` in `POWER.md` frontmatter does not match the marketplace entry name.
+- Forgetting to run `node scripts/generate.mjs` after editing `plugin.src.json`.
 - Missing frontmatter keys (`name`, `description`) in skills, agents, or commands.
 - Rule files missing frontmatter `description`.
 - Broken relative paths for `logo`, `hooks`, or `mcpServers` in manifest files.
-- Forgetting to update one of the applicable marketplace manifests.
+- Editing a marketplace index's `plugins` list or `POWER.md` frontmatter by hand.
+- Hand-writing a file at a generated path (such as `mcp_config.json`) in a plugin that doesn't target that platform, or anywhere under `kiro/`; the generator removes it.

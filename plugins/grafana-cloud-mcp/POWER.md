@@ -1,17 +1,17 @@
 ---
 name: "grafana-cloud-mcp"
-displayName: "Grafana Cloud MCP"
-description: "Hosted MCP server for AI-assisted Grafana Cloud observability: dashboards, datasources, Prometheus, Loki, Tempo, alerting, incidents, OnCall, and more — no local installation required"
+displayName: "Grafana Cloud"
+description: "For Grafana Cloud: a hosted MCP server with OAuth sign-in for dashboards, metrics, logs, traces, alerts, and incidents. Nothing to install."
 keywords: ["grafana", "mcp", "cloud", "observability", "dashboards", "prometheus", "loki", "tempo", "alerting", "incidents", "oncall", "monitoring"]
 ---
 
-# Grafana Cloud MCP
+# Grafana Cloud
 
-Connects to the hosted [Grafana Cloud MCP server](https://grafana.com/docs/grafana-cloud/developer-resources/assistant/configure/cloud-mcp/) — 60+ tools for AI-assisted observability workflows across dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, and more.
+Connects to the hosted [Grafana Cloud MCP server](https://grafana.com/docs/grafana-cloud/developer-resources/assistant/configure/cloud-mcp/) — dozens of tools for AI-assisted observability workflows across dashboards, datasources, Prometheus, Loki, Tempo, Pyroscope, alerting, incidents, OnCall, and more.
 
 Unlike the local [grafana-mcp](../grafana-mcp/) power which runs via Docker, this server is fully hosted and uses OAuth 2.1 authorization — no local installation or service account tokens required.
 
-> **Note:** This power adds 60+ MCP tools to your context window. Only enable it when you need to interact with a live Grafana Cloud instance.
+> **Note:** This power adds dozens of MCP tools to your context window. Only enable it when you need to interact with a live Grafana Cloud instance.
 
 ## Onboarding
 

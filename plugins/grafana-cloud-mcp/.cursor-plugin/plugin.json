@@ -1,8 +1,8 @@
 {
   "name": "grafana-cloud-mcp",
-  "displayName": "Grafana Cloud MCP",
-  "version": "0.2.0",
-  "description": "Hosted MCP server for AI-assisted Grafana Cloud observability — no local installation required.",
+  "displayName": "Grafana Cloud",
+  "version": "0.3.0",
+  "description": "For Grafana Cloud: a hosted MCP server with OAuth sign-in for dashboards, metrics, logs, traces, alerts, and incidents. Nothing to install.",
   "author": {
     "name": "Grafana Labs",
     "email": "grafana-assistant@grafana.com"
@@ -10,6 +10,19 @@
   "homepage": "https://github.com/grafana/ai-marketplace/tree/main/plugins/grafana-cloud-mcp",
   "repository": "https://github.com/grafana/ai-marketplace",
   "license": "Apache-2.0",
-  "keywords": ["grafana", "mcp", "cloud", "observability", "dashboards", "prometheus", "loki"],
-  "logo": "assets/logo.svg"
+  "keywords": [
+    "grafana",
+    "mcp",
+    "cloud",
+    "observability",
+    "dashboards",
+    "prometheus",
+    "loki"
+  ],
+  "logo": "assets/logo.svg",
+  "mcpServers": {
+    "grafana-cloud": {
+      "url": "https://mcp.grafana.com/mcp"
+    }
+  }
 }

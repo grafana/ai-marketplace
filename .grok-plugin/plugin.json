@@ -11,7 +11,6 @@
   "keywords": ["grafana", "grafana mcp", "grafana cloud", "observability"],
   "skills": [
     "plugins/grafana-mcp/skills/grafana-mcp-tools",
-    "plugins/grafana-assistant/skills/grafana-assistant-cli",
     "plugins/grafana-cloud-mcp/skills/grafana-cloud-mcp-tools"
   ],
   "mcpServers": "plugins/grafana-mcp/.mcp.json"

@@ -1,10 +1,10 @@
-# Grafana MCP
+# Grafana (self-hosted)
 
-Cursor plugin that exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) for AI-assisted observability workflows.
+Plugin that exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) for AI-assisted observability workflows.
 
-**Using Grafana Cloud?** Use the [grafana-cloud-mcp](../grafana-cloud-mcp/) plugin or the Grafana Cloud connector instead — no Docker or service-account token needed. This plugin is for self-hosted Grafana or token-based setups.
+**Using Grafana Cloud?** Use the [Grafana Cloud](../grafana-cloud-mcp/) plugin or the Grafana Cloud connector instead — no Docker or service-account token needed. This plugin is for self-hosted Grafana or token-based setups.
 
-**Note:** This plugin adds 40+ MCP tools to your context window. Only enable it when you need to interact with a live Grafana instance. For skills and rules around Grafana Assistant development, install the **grafana-assistant** plugin instead.
+**Note:** This plugin adds dozens of MCP tools to your context window. Only enable it when you need to interact with a live Grafana instance.
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ For Grafana Cloud, use your instance URL instead (e.g. `https://myinstance.grafa
 
 ## Available tools
 
-The MCP server provides 40+ tools across these categories:
+The MCP server provides dozens of tools across these categories:
 
 | Category | Examples |
 |---|---|

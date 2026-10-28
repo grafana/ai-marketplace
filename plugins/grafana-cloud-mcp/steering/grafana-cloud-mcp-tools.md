@@ -1,139 +1,57 @@
-# Grafana Cloud MCP Server — Tools & Best Practices
+# Grafana Cloud MCP Server
 
-Hosted MCP server providing 60+ Grafana Cloud tools via Streamable HTTP with OAuth 2.1 authorization.
+Grafana's hosted MCP server for Grafana Cloud, at `https://mcp.grafana.com/mcp`. It uses Streamable HTTP and OAuth 2.1. There's nothing to install and no token to manage.
 
-## Configuration
+## Prerequisites
 
-No local installation or environment variables required. The server connects via `https://mcp.grafana.com/mcp` using Streamable HTTP. When prompted, enter your Grafana Cloud URL and authorize in your browser.
+- A Grafana Cloud account. For self-hosted Grafana, use the local OSS MCP server instead.
+- The **Assistant Cloud MCP User** role, or the `grafana-assistant-app.cloud-mcp:access` permission. Editor and higher have it by default.
+- An administrator must have accepted the Grafana Assistant terms and conditions.
+
+## Connecting
+
+1. The server connects when the plugin loads.
+2. When prompted, sign in through your browser and choose the Grafana Cloud stack to connect to.
+3. The OAuth token lasts 1 hour and refreshes automatically for 30 days. After that, sign in again.
 
 ## Read and write access
 
-Access is user-scoped via OAuth 2.1. During authorization, users choose:
+On the consent page, the user chooses what to grant:
 
-- **Read access**: View dashboards, alerts, incidents, and query data sources. Always available.
-- **Write access**: Create and modify dashboards, alerts, and incidents. Can be unchecked for read-only access.
+- **Read**: view dashboards, alerts and incidents, and query data sources. Always granted.
+- **Write**: create and change dashboards, alerts, incidents and annotations, and ask Grafana Assistant questions. Can be unchecked for read-only access.
 
-Tools marked **Write** below require the `grafana:write` scope.
+Granting write needs the **Assistant Admin** role or the `grafana-assistant-app.cloud-mcp.scope:write` permission. If **Write** is unavailable on the consent page, a Grafana organization administrator has to grant one of those first.
 
-## Tool categories
+## Choosing tools
 
-### Search and navigation
+The tool list changes as Grafana adds capabilities, so this skill doesn't list tools. Rely on the server instead:
 
-- `search_dashboards` — search for dashboards by query string
-- `search_folders` — search for folders by query string
-- `generate_deeplink` — generate deeplink URLs for dashboards, panels, and Explore queries
+- Read the server's instructions, which the client receives on connect, and each tool's description. They're kept current with the server and say what each tool does and when to use it.
+- Pick tools by what the user is asking about. There are tools for dashboards, data sources, Prometheus, Loki, Tempo and Pyroscope queries, SQL data sources, alerting, incidents, OnCall, annotations, Grafana Assistant investigations, deep links and panel rendering.
+- When no dedicated tool covers a task, the server describes fallbacks (a Grafana CLI tool and a raw Grafana API tool). Use those rather than giving up.
+- If the user expects a tool that isn't there, it may need write access, or it may not be available on their stack. Say so rather than guessing at a name.
 
-### Dashboards and folders
+## Grafana Assistant
 
-- `get_dashboard_by_uid` — full dashboard JSON (large, avoid unless needed)
-- `get_dashboard_summary` — compact overview (preferred over full JSON)
-- `get_dashboard_property` — extract specific parts via JSONPath
-- `get_dashboard_panel_queries` — get panel queries and datasource info
-- `update_dashboard` — create or update a dashboard (**Write**)
-- `create_folder` — create a Grafana folder (**Write**)
+- For open-ended questions ("Why is checkout latency spiking?", "Summarize the current incident", "Explain this alert"), hand the question to Grafana Assistant. It plans the investigation across metrics, logs and traces and returns a grounded answer. For longer root-cause work, start an Assistant investigation and read its report.
+- Asking Grafana Assistant needs write access. Without it, answer from the read-only query tools, and tell the user that Assistant questions need write access, which they can grant by reconnecting.
+- For targeted lookups (a known query, dashboard, alert or incident), call the specific tool directly. Going through Assistant there only adds latency.
 
-### Datasources
+## Keeping context small
 
-- `list_datasources` — list all datasources with optional type filtering
-- `get_datasource` — get datasource details by UID or name
+- Prefer the tools that return a dashboard's summary or a single property over the one that returns its full JSON.
+- Search for dashboards, folders and data sources before fetching one by UID.
+- Discover metric and label names before writing PromQL or LogQL, rather than guessing.
+- Give link-generating tools priority when presenting results: a clickable deep link beats describing how to navigate there.
 
-### Prometheus
+## Querying
 
-- `query_prometheus` — execute PromQL instant or range queries
-- `list_prometheus_metric_metadata` — get metric metadata
-- `list_prometheus_metric_names` — list available metrics with regex filtering
-- `list_prometheus_label_names` / `list_prometheus_label_values` — label discovery
-- `query_prometheus_histogram` — calculate histogram percentiles
+- Always set a time range. Start narrow (the last hour, say) and widen it only if needed.
+- In Loki, use label matchers to select streams before filtering on line content.
+- Aggregate before returning series: a `sum by (...)` or `topk` is usually more useful than hundreds of raw series.
 
-### Loki
+## Safety
 
-- `query_loki_logs` — query logs/metrics using LogQL
-- `list_loki_label_names` / `list_loki_label_values` — label discovery
-- `query_loki_stats` — stream statistics
-- `query_loki_patterns` — detected log patterns
-
-### Tempo
-
-Proxied from Tempo data sources. Available if you have Tempo in your Grafana Cloud stack. Includes TraceQL queries and attribute discovery.
-
-### Pyroscope
-
-- `list_pyroscope_label_names` / `list_pyroscope_label_values` — label discovery
-- `list_pyroscope_profile_types` — available profile types
-- `query_pyroscope` — query profiles or metrics
-
-### ClickHouse
-
-- `list_clickhouse_tables` — list tables with metadata
-- `describe_clickhouse_table` — get column schema
-- `query_clickhouse` — execute SQL queries
-
-### CloudWatch
-
-- `list_cloudwatch_namespaces` / `list_cloudwatch_metrics` / `list_cloudwatch_dimensions` — discovery
-- `query_cloudwatch` — query AWS CloudWatch metrics
-
-### Elasticsearch
-
-- `query_elasticsearch` — Lucene or Query DSL searches
-
-### Alerting
-
-- `alerting_manage_rules` — list, filter, create, and update alert rules (Read / **Write**)
-- `alerting_manage_routing` — view routing, notification policies, contact points (Read)
-
-### Annotations
-
-- `get_annotations` / `get_annotation_tags` — read annotations
-- `create_annotation` / `update_annotation` — manage annotations (**Write**)
-
-### Incidents
-
-- `list_incidents` / `get_incident` — read incidents
-- `create_incident` / `add_activity_to_incident` — manage incidents (**Write**)
-
-### OnCall
-
-- `list_oncall_schedules` / `get_oncall_shift` / `get_current_oncall_users` — schedules
-- `list_oncall_teams` / `list_oncall_users` — team/user discovery
-- `list_alert_groups` / `get_alert_group` — alert groups
-
-### Sift (investigation)
-
-- `list_sift_investigations` / `get_sift_investigation` / `get_sift_analysis` — investigations
-- `find_error_pattern_logs` / `find_slow_requests` — search for issues (**Write**)
-
-### Other tools
-
-- `ask_assistant` — send a prompt to Grafana Assistant (**Write**)
-- `get_assertions` — get assertion summary for an entity
-- `get_panel_image` — render panel as PNG image
-- `describe_infrastructure` — pre-built summaries of service groups
-- `get_query_examples` — example queries for datasource types
-
-## Best practices
-
-### Context window management
-
-- Use `get_dashboard_summary` instead of `get_dashboard_by_uid` to avoid consuming context with full dashboard JSON.
-- Use `get_dashboard_property` with JSONPath to extract only the specific parts you need.
-- Use `search_dashboards` to discover dashboards before retrieving by UID.
-- When presenting Grafana data, use `generate_deeplink` to provide clickable URLs rather than describing navigation steps.
-
-### Querying
-
-- When querying Prometheus, always specify a reasonable time range to avoid overwhelming results.
-- When querying Loki, prefer targeted LogQL selectors with label matchers over broad queries.
-- Use datasource discovery tools (`list_datasources`, `list_prometheus_metric_names`) before writing queries.
-
-### Safety
-
-- Avoid write operations (`update_dashboard`, `create_incident`, `alerting_manage_rules`) unless explicitly asked by the user.
-- If write access was not granted during OAuth authorization, write tools will not be available.
-
-### Access and permissions
-
-- Access is user-scoped: the agent has only the permissions your Grafana RBAC grants you.
-- **Editor** role or higher is required to use the Cloud MCP server.
-- Write tools require the `grafana:write` scope, granted during OAuth consent.
-- Organization Admins can grant write access by default. Others need the **Assistant Admin** role.
+- Don't make changes (dashboards, alert rules, incidents, silences) unless the user asked for them. Confirm before anything destructive.
+- Access is user-scoped: the agent can do only what the user's Grafana RBAC allows.

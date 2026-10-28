@@ -1,4 +1,4 @@
-# Grafana Cloud MCP
+# Grafana Cloud
 
 Plugin that connects AI agents to the hosted [Grafana Cloud MCP server](https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/) for AI-assisted observability workflows.
 
@@ -18,7 +18,7 @@ No local installation or environment variables required. When your AI agent firs
 
 ## Available tools
 
-The Cloud MCP server provides 60+ tools across these categories:
+The Cloud MCP server provides dozens of tools across these categories:
 
 | Category      | Examples                                                       |
 | ------------- | -------------------------------------------------------------- |
@@ -28,16 +28,20 @@ The Cloud MCP server provides 60+ tools across these categories:
 | Loki          | LogQL log/metric queries, label metadata, patterns             |
 | Tempo         | TraceQL queries, attribute discovery (proxied from datasource) |
 | Pyroscope     | profile queries, label names/values, profile types             |
-| ClickHouse    | list tables, describe table, SQL queries                       |
+| SQL           | list databases and tables, describe tables, SQL queries        |
 | CloudWatch    | namespaces, metrics, dimensions, queries                       |
 | Elasticsearch | Lucene and Query DSL searches                                  |
-| Alerting      | list/create/update alert rules, routing, contact points        |
+| Alerting      | alert rules, notification routing, contact points, silences    |
 | Incidents     | search, create, add activity                                   |
 | OnCall        | schedules, shifts, on-call users, alert groups                 |
-| Sift          | investigations, analyses, error patterns, slow requests        |
 | Annotations   | get, create, update, list tags                                 |
 | Navigation    | generate deeplinks to dashboards, panels, Explore              |
 | Rendering     | export dashboard panels as PNG images                          |
-| Other         | ask_assistant, describe_infrastructure, get_assertions         |
+| Assistant     | ask Grafana Assistant, run investigations and read reports     |
 
 See the [Grafana Cloud MCP documentation](https://grafana.com/docs/grafana-cloud/machine-learning/assistant/configure/cloud-mcp/) for the full tool reference.
+
+## Privacy and support
+
+- Privacy policy: <https://grafana.com/legal/privacy-policy/>
+- Support: <https://grafana.com/support/> or [open an issue](https://github.com/grafana/ai-marketplace/issues)

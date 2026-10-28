@@ -1,15 +1,15 @@
 ---
 name: "grafana-mcp"
-displayName: "Grafana MCP"
-description: "AI-assisted Grafana observability: dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more via the official MCP server"
+displayName: "Grafana (self-hosted)"
+description: "For self-hosted Grafana, or any Grafana with a service-account token: dashboards, Prometheus, Loki, alerting, incidents, and OnCall via the Grafana MCP server, run locally in Docker."
 keywords: ["grafana", "mcp", "observability", "dashboards", "prometheus", "loki", "alerting", "incidents", "oncall", "monitoring"]
 ---
 
-# Grafana MCP
+# Grafana (self-hosted)
 
-Exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) — 50+ tools for AI-assisted observability workflows across dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more.
+Exposes the official [Grafana MCP server](https://github.com/grafana/mcp-grafana) — dozens of tools for AI-assisted observability workflows across dashboards, datasources, Prometheus, Loki, alerting, incidents, OnCall, and more.
 
-> **Note:** This power adds 50+ MCP tools to your context window. Only enable it when you need to interact with a live Grafana instance.
+> **Note:** This power adds dozens of MCP tools to your context window. Only enable it when you need to interact with a live Grafana instance.
 
 ## Onboarding
 
