@@ -84,7 +84,6 @@ plugins/grafana-cloud-mcp/
 ├── plugin.src.json              # Source for the generated files below
 ├── .cursor-plugin/plugin.json   # Cursor manifest, with MCP servers inline (generated)
 ├── .claude-plugin/plugin.json   # Claude Code manifest (generated)
-├── .grok-plugin/plugin.json     # Grok Build manifest (when targeted)
 ├── .codex-plugin/plugin.json    # Codex manifest (mcpServers + skills + listing metadata, generated)
 ├── .antigravity-plugin/plugin.json # Antigravity manifest (generated)
 ├── POWER.md                     # Legacy Kiro manifest (generated frontmatter + hand-written onboarding)
