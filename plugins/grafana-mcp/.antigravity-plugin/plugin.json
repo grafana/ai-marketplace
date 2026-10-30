@@ -1,0 +1,28 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "grafana-mcp",
+  "displayName": "Grafana (self-hosted)",
+  "version": "0.3.1",
+  "description": "For self-hosted Grafana, or any Grafana with a service account token: query metrics and logs, and manage dashboards, alerts and incidents, via Docker.",
+  "author": {
+    "name": "Grafana Labs",
+    "email": "grafana-assistant@grafana.com"
+  },
+  "homepage": "https://github.com/grafana/ai-marketplace/tree/main/plugins/grafana-mcp",
+  "repository": "https://github.com/grafana/ai-marketplace",
+  "license": "Apache-2.0",
+  "keywords": [
+    "grafana",
+    "mcp",
+    "observability",
+    "dashboards",
+    "prometheus",
+    "loki"
+  ],
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "Find the dashboard for the checkout service and summarize its panels",
+    "Show me error logs from the payments service in the last hour",
+    "Which alert rules are firing right now?"
+  ]
+}
