@@ -164,12 +164,9 @@ function generatedFiles(source) {
       }
     }
   }
-  // Codex reads .mcp.json, whose ${user_config.*} placeholders only Claude Code
-  // fills. Antigravity would need its own "variables" prompt, which isn't generated.
-  for (const platform of ["codex", "antigravity"]) {
-    if (platforms[platform] && source.userConfig) {
-      throw new Error(`${source.name}: "userConfig" can't be combined with the ${platform} platform.`);
-    }
+  // Codex reads .mcp.json, whose ${user_config.*} placeholders only Claude Code fills.
+  if (platforms.codex && source.userConfig) {
+    throw new Error(`${source.name}: "userConfig" can't be combined with the codex platform.`);
   }
 
   if (platforms.claude) {
@@ -216,15 +213,35 @@ function generatedFiles(source) {
     files[".mcp.json"] = { mcpServers: typedMcpServers(source.mcpServers, source.userConfig) };
     files["mcp.json"] = { mcpServers: typedMcpServers(source.mcpServers) };
     if (platforms.antigravity) {
-      files["mcp_config.json"] = {
-        mcpServers: Object.fromEntries(
-          servers.map(([name, { url, ...server }]) => [name, url ? { serverUrl: url, ...server } : server])
-        ),
-      };
+      files["mcp_config.json"] = antigravityMcpConfig(source.name, servers, source.userConfig);
     }
   }
 
   return files;
+}
+
+// Antigravity's MCP config. Its "variables" prompt for the userConfig options at
+// install, keeps secrets in the OS keychain, and fills ${NAME} placeholders.
+function antigravityMcpConfig(pluginName, servers, userConfig = {}) {
+  const variables = Object.values(userConfig).map((option) =>
+    merge({ name: option.env, title: option.title, description: option.description }, { secret: option.sensitive })
+  );
+
+  const declared = new Set(["PLUGIN_ROOT", "PLUGIN_DATA", ...variables.map((variable) => variable.name)]);
+  for (const [, , name] of JSON.stringify(servers).matchAll(/\$\{(env:)?([A-Za-z_][A-Za-z0-9_]*)\}/g)) {
+    if (!declared.has(name)) {
+      throw new Error(`${pluginName}: Antigravity can't fill \${${name}}; add a userConfig option with "env": "${name}".`);
+    }
+  }
+
+  return merge(
+    {
+      mcpServers: Object.fromEntries(
+        servers.map(([name, { url, ...server }]) => [name, url ? { serverUrl: url, ...server } : server])
+      ),
+    },
+    { variables: variables.length > 0 ? variables : undefined }
+  );
 }
 
 // The Agent Plugins manifest and MCP config of a plugin's Kiro power.
