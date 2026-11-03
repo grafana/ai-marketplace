@@ -25,12 +25,12 @@ You need the **Assistant Cloud MCP User** role or the `grafana-assistant-app.clo
 
 The `grafana-cloud` MCP server defined in `mcp.json` connects automatically when Kiro loads this power. No local installation or environment variables are required.
 
-When prompted, enter your Grafana Cloud URL and authorize the connection in your browser. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
+When prompted, sign in through your browser, choose your Grafana Cloud stack, and choose which access to grant: **Read**, **Query** (raw SQL, which can change data) and **Write** (create, modify and delete, including Grafana Assistant). For a read-only connection, clear both Query and Write. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
 
 ## When to Load Steering Files
 
 - Querying dashboards, datasources, Prometheus, Loki, or Tempo -> `grafana-cloud-mcp-tools.md`
 - Managing alerting, incidents, or OnCall -> `grafana-cloud-mcp-tools.md`
 - Choosing which tool to use for a task -> `grafana-cloud-mcp-tools.md`
-- Understanding read vs write access -> `grafana-cloud-mcp-tools.md`
+- Understanding the Read, Query and Write access levels -> `grafana-cloud-mcp-tools.md`
 - Optimizing context window usage -> `grafana-cloud-mcp-tools.md`
