@@ -87,6 +87,14 @@
           "grafana.net"
         ]
       }
+    },
+    "antigravity": {
+      "description": "For self-hosted Grafana, or any Grafana with a service account token: query metrics and logs, and manage dashboards, alerts and incidents, via Docker.",
+      "suggestedPrompts": [
+        "Find the dashboard for the checkout service and summarize its panels",
+        "Show me error logs from the payments service in the last hour",
+        "Which alert rules are firing right now?"
+      ]
     }
   }
 }

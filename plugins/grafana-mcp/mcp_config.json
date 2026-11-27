@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "grafana": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-e",
+        "GRAFANA_URL",
+        "-e",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN",
+        "grafana/mcp-grafana",
+        "-t",
+        "stdio"
+      ],
+      "env": {
+        "GRAFANA_URL": "${GRAFANA_URL}",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN": "${GRAFANA_SERVICE_ACCOUNT_TOKEN}"
+      }
+    }
+  },
+  "variables": [
+    {
+      "name": "GRAFANA_URL",
+      "title": "Grafana instance URL",
+      "description": "Your Grafana instance URL. For Grafana Cloud: https://<stack>.grafana.net. For self-hosted: e.g. http://localhost:3000."
+    },
+    {
+      "name": "GRAFANA_SERVICE_ACCOUNT_TOKEN",
+      "title": "Grafana service account token",
+      "description": "Create a service account token at <your-grafana-url>/org/serviceaccounts with at least Viewer role (Editor for write operations).",
+      "secret": true
+    }
+  ]
+}
