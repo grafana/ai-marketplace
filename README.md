@@ -20,7 +20,7 @@ The Grafana Cloud connector and the `grafana-cloud-mcp` plugin are not alternati
 2. Add the connector:
    - **Free, Pro, or Max:** go to [**Customize → Connectors**](https://claude.ai/customize/connectors), choose **Add custom connector**, and enter `https://mcp.grafana.com/mcp`.
    - **Team or Enterprise:** an Owner adds it once for the organization under [**Organization settings → Connectors**](https://claude.ai/admin-settings/connectors) (**Add → Custom → Web**, URL `https://mcp.grafana.com/mcp`). Members can't add custom connectors themselves; it then appears for them under **Customize → Connectors** with a **Custom** label.
-3. Select **Connect**, enter your Grafana Cloud URL, and authorize in your browser. Choose read-only or read + write access during consent.
+3. Select **Connect**, sign in through your browser, choose your Grafana Cloud stack, and choose which access to grant (see [Access levels](#access-levels)).
 
 Grafana Cloud is also listed in the [Claude Connectors Directory](https://claude.com/marketplace/connectors/grafana-cloud), which you can add it from instead of entering the URL.
 
@@ -28,11 +28,19 @@ Grafana Cloud is also listed in the [Claude Connectors Directory](https://claude
 
 1. Meet the same Grafana Cloud role requirement as above.
 2. Install the `grafana-cloud-mcp` plugin from your platform's marketplace (see [Add this marketplace](#add-this-marketplace)).
-3. When prompted, enter your Grafana Cloud URL and authorize the connection in your browser. Choose read-only or read + write access during consent.
-
-Authorizing **read + write** access, through either the connector or the plugin, additionally requires the **Assistant Admin** role or the `grafana-assistant-app.cloud-mcp.scope:write` permission. If **Write** is unavailable on the OAuth consent page, ask your Grafana organization administrator to grant it.
+3. When prompted, sign in through your browser, choose your Grafana Cloud stack, and choose which access to grant (see [Access levels](#access-levels)).
 
 No Docker, environment variables, or service-account token are required.
+
+#### Access levels
+
+The consent page, for both the connector and the plugin, offers three access levels, each as its own checkbox:
+
+- **Read**: view dashboards, alerts, incidents, metrics, logs, traces and profiles, and query Prometheus, Loki, Tempo and Pyroscope.
+- **Query**: run raw queries against SQL data sources such as ClickHouse, Snowflake, Athena and InfluxDB. These run as written, so they can change data. Editors can grant it by default.
+- **Write**: create, modify and delete anything you can in Grafana, including asking Grafana Assistant. Granting it requires the **Assistant Admin** role or the `grafana-assistant-app.cloud-mcp.scope:write` permission.
+
+For a read-only connection, clear both **Query** and **Write**. If a checkbox is unavailable, ask your Grafana organization administrator. See [Manage Assistant access with RBAC](https://grafana.com/docs/grafana-cloud/platform/grafana-assistant/privacy-and-security/rbac/).
 
 ### Self-hosted Grafana (`grafana-mcp`, Docker + service-account token)
 

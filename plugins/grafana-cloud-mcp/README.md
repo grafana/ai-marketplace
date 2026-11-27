@@ -14,7 +14,17 @@ The Cloud MCP server is fully hosted and uses OAuth 2.1 authorization — no loc
 
 ## Setup
 
-No local installation or environment variables required. When your AI agent first connects, you'll be prompted to enter your Grafana Cloud URL and authorize the connection in your browser. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
+No local installation or environment variables required. When your AI agent first connects, you'll be prompted to sign in through your browser, choose the Grafana Cloud stack, and choose which access to grant. Your OAuth token is valid for 1 hour and refreshes automatically for 30 days.
+
+The consent page offers three access levels, each as its own checkbox:
+
+| Level | What the connection can do | Who can grant it |
+| --- | --- | --- |
+| **Read** | View dashboards, alerts, incidents, metrics, logs, traces and profiles, and query Prometheus, Loki, Tempo and Pyroscope | **Assistant Cloud MCP User** |
+| **Query** | Run raw queries against SQL data sources such as ClickHouse, Snowflake, Athena and InfluxDB. These run as written, so they can change data | **Assistant Cloud MCP User**, which every Editor holds by default |
+| **Write** | Create, modify and delete anything you can in Grafana, including asking Grafana Assistant and starting Assistant investigations. Includes Query and Read | **Assistant Admin**, or the `grafana-assistant-app.cloud-mcp.scope:write` permission |
+
+**For a read-only connection, clear both Query and Write.** Clearing only Write still allows SQL that can change data. See [Manage Assistant access with RBAC](https://grafana.com/docs/grafana-cloud/platform/grafana-assistant/privacy-and-security/rbac/).
 
 ## Available tools
 
